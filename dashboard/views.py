@@ -10,6 +10,10 @@ def dashboard(request):
     return render(request, 'dashboard/dashboard.html')
 
 
+def base(request):
+    return render(request, 'layout/base.html')
+
+
 def demo(request):
     campaignDF = script.getAllCampaign()
     context = {

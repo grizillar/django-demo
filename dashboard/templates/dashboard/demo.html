@@ -1,4 +1,25 @@
-<!DOCTYPE html>
+{% extends 'layout/base.html' %}
+{% block title %}
+  Dashboard
+{% endblock %}
+{% block stylesheets %}
+
+{% endblock %}
+{% block content %}
+  <p>This is DEMO page</p>
+  {% if campaignLength %}
+    <p id="data_count">
+      Campaign data found: <b>{{ campaignLength }}</b>
+    </p>
+  {% else %}
+    <p>No data found</p>
+  {% endif %}
+{% endblock %}
+
+{% block javascript %}
+  <script src="/static/dashboard/demo.js"></script>
+{% endblock %}
+<!--          <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +36,6 @@
     {% endif %}
 </body>
 <script>
-    var campaignJSON = '{{campaignJSON}}'
 </script>
 <script src="/static/dashboard/demo.js"></script>
-</html>
+</html>          -->

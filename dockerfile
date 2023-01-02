@@ -1,5 +1,5 @@
 # base image  
-FROM python:3.10.4   
+FROM python:3.8-slim-buster
 # setup environment variable  
 ENV DockerHOME=/home/app/webapp  
 
@@ -13,6 +13,10 @@ WORKDIR $DockerHOME
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1  
 
+# RUN su
+# RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+# RUN apt-get update
+# RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17
 # install dependencies  
 RUN pip install --upgrade pip  
 
@@ -20,7 +24,8 @@ RUN pip install --upgrade pip
 COPY . $DockerHOME  
 # run this command to install all dependencies  
 RUN pip install -r requirements.txt  
+
 # port where the Django app runs  
 EXPOSE 8000  
 # start server  
-CMD python manage.py runserver  
+CMD ["python3", "manage.py", "runserver"]

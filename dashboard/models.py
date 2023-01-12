@@ -53,3 +53,7 @@ class Sitetraffic(models.Model):
     class Meta:
         managed = False
         db_table = 'SiteTraffic'
+
+
+class Document(models.Model):
+    csvfile = models.FileField(upload_to='documents/')

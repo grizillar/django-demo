@@ -1,0 +1,21 @@
+{% extends 'layout/base.html' %} {% block title %}
+  Upload
+{% endblock %} {% block stylesheets %}
+
+{% endblock %} {% block content %}
+  <p>This is Upload page</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csvfile" />
+    <select id="type" name="type">
+      <option value="FB">Facebook/IG</option>
+      <option value="LP">Line(Post)</option>
+      <option value="LM">Line(Message)</option>
+      <option value="GC">Google Analytics(Campaign)</option>
+      <option value="GS">Google Analytics(Site Traffic)</option>
+    </select>
+    <input type="submit" value="Upload" name="submit" />
+  </form>
+{% endblock %} {% block javascript %}
+  <script src="/static/upload/upload.js"></script>
+{% endblock %}

@@ -11,6 +11,8 @@
     </title>
 
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" />
+    <link rel="stylesheet" href="/static/styles2.css" />
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
 
     <!-- Specific Styling -->
     {% block stylesheets %}
@@ -19,9 +21,20 @@
   </head>
 
   <body>
-    {% include 'component/navigation.html' %} {% block content %}
+    <div class="container-fluid">
+      <div class="row flex-nowrap">
+        {% include 'component/sidebar2.html' %}
+        <div class="col py-3">
+          {% block content %}
 
-    {% endblock %} {% block javascript %}
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/bootstrap/js/bootstrap.js"></script>
+
+    {% block javascript %}
 
     {% endblock %}
   </body>

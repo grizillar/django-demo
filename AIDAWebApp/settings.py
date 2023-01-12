@@ -14,6 +14,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+import os
+
 # Load environment variables from .env.
 load_dotenv()
 
@@ -130,6 +132,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Media Files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Default primary key field type

@@ -1,6 +1,9 @@
 import pandas as pd
 import sqlalchemy as sa
+import pyodbc
+import dashboard.scripts.dbmap as dbmap
 import os
+
 
 DATABASE = 'AIDAChula'
 USER = ''
@@ -41,6 +44,22 @@ def getAllCampaign():
     return campaign
 
 
+def getCampaignLength():
+    query = f"""
+        SELECT COUNT(cid)
+        FROM dbo.Campaign
+    """
+    return int(pd.read_sql_query(query, con=engine).iloc[0])
+
+
+def getSitetrafficLength():
+    query = f"""
+        SELECT COUNT(sid)
+        FROM dbo.SiteTraffic
+    """
+    return int(pd.read_sql_query(query, con=engine).iloc[0])
+
+
 def writeCSV(file):
     TEMPPATH = './dashboard/tmp/temp.csv'
     try:
@@ -52,3 +71,35 @@ def writeCSV(file):
         return len(df.columns)
     except FileNotFoundError:
         print(os.listdir())
+
+
+def insertCampaign(df):
+    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+HOST +
+                          ';DATABASE='+DATABASE+';UID='+USER+';PWD=' + PASSWORD)
+    cursor = cnxn.cursor()
+
+    df['cid'] = df['cid'] + getCampaignLength()
+    df.rename(columns={'name': 'cname'}, inplace=True)
+
+    for index, row in df.iterrows():
+        cursor.execute("INSERT INTO dbo.Campaign (date, cid, name, pid, spending, reach, impression, engagement, objective, video_view, landing_page_view, product_view, add_to_cart, purchase, dateadded) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                       row.date, row.cid, row.cname, row.pid, row.spending, row.reach, row.impression, row.engagement, row.objective, row.video_view, row.landing_page_view, row.product_view, row.add_to_cart, row.purchase, row.dateadded)
+
+    cnxn.commit()
+    cursor.close()
+
+
+def insertSiteTraffic(df):
+    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+HOST +
+                          ';DATABASE='+DATABASE+';UID='+USER+';PWD=' + PASSWORD)
+    cursor = cnxn.cursor()
+
+    df['sid'] = df['sid'] + getSitetrafficLength()
+    df.rename(columns={'name': 'cname'}, inplace=True)
+
+    for index, row in df.iterrows():
+        cursor.execute("INSERT INTO dbo.SiteTraffic (sid, pid, uri, all_user, new_user, order_count, revenue, dateadded) values (?,?,?,?,?,?,?,?)",
+                       row.sid, row.pid, row.uri, row.all_user, row.new_user, row.order_count, row.revenue, row.dateadded)
+
+    cnxn.commit()
+    cursor.close()

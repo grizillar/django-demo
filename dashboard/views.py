@@ -5,6 +5,7 @@ from django.template import RequestContext
 from .forms import UploadFileForm
 from .models import Campaign, Document
 import dashboard.scripts.handler as handler
+import dashboard.scripts.dbmap as dbmap
 
 # Create your views here.
 
@@ -23,7 +24,17 @@ def upload(request):
             colLength = handler.writeCSV(request.FILES['csvfile'])
 
             if handler.colCheck(colLength, type):
-                print("match")
+                if type == "FB":
+                    handler.insertCampaign(dbmap.FBTransform())
+                if type == "LP":
+                    handler.insertCampaign(dbmap.LPTransform())
+                if type == "LM":
+                    handler.insertCampaign(dbmap.LMTransform())
+                if type == "GC":
+                    handler.insertCampaign(dbmap.GCTransform())
+                if type == "GS":
+                    handler.insertSiteTraffic(dbmap.GSTransform())
+
             else:
                 print("unmatch")
 

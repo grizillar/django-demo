@@ -19,22 +19,31 @@ def upload(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             type = request.POST.get("type")
+            date = request.POST.get("date")
 
             # file function
             colLength = handler.writeCSV(request.FILES['csvfile'])
 
             if handler.colCheck(colLength, type):
                 if type == "FB":
-                    handler.insertCampaign(dbmap.FBTransform())
+                    data = dbmap.FBTransform()
                 if type == "LP":
-                    handler.insertCampaign(dbmap.LPTransform())
+                    data = dbmap.LPTransform()
                 if type == "LM":
-                    handler.insertCampaign(dbmap.LMTransform())
+                    data = dbmap.LMTransform()
                 if type == "GC":
-                    handler.insertCampaign(dbmap.GCTransform())
+                    data = dbmap.GCTransform()
                 if type == "GS":
-                    handler.insertSiteTraffic(dbmap.GSTransform())
+                    data = dbmap.GSTransform()
 
+                # Config apply here
+                if date:
+                    handler.applyDate(data, date)
+
+                if type == "GS":
+                    handler.insertSiteTraffic(data)
+                else:
+                    handler.insertCampaign(data)
             else:
                 print("unmatch")
 
@@ -44,7 +53,7 @@ def upload(request):
     else:
         print("file's not ok2")
         form = UploadFileForm()
-    return render(request, 'upload/upload.html', {'form': form})
+    return render(request, 'upload/upload2.html', {'form': form})
 
 
 def base(request):

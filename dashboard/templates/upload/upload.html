@@ -14,6 +14,10 @@
       <option value="GC">Google Analytics(Campaign)</option>
       <option value="GS">Google Analytics(Site Traffic)</option>
     </select>
+    <button type="button" data-bs-toggle="collapse" data-bs-target="#config" aria-expanded="false" aria-controls="collapseExample">Expand Config</button>
+    <div class="collapse" id="config">
+      <input id="date" name="date" class="form-control" type="date" />
+    </div>
     <input type="submit" value="Upload" name="submit" />
   </form>
 {% endblock %} {% block javascript %}

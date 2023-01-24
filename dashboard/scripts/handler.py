@@ -18,6 +18,12 @@ engine = sa.create_engine(
 )
 
 
+def applyDate(df, date):
+    if "date" in df.columns:
+        df["date"] = date
+    return df
+
+
 def colCheck(col, type):
     if col == 10 and type == "GS":
         return True

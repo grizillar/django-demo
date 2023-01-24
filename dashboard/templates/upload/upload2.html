@@ -1,0 +1,156 @@
+{% extends "layout/base.html" %} {% block title %} Upload {% endblock title %} {% block stylesheets %}
+<link rel="stylesheet" href="/static/bootstrap/css/bs-stepper.min.css" />
+<link rel="stylesheet" href="/static/upload/upload.css" />
+{%endblock stylesheets %} {% block javascript %}
+<script src="/static/bootstrap/js/bs-stepper.min.js"></script>
+<script src="/static/upload/upload.js"></script>
+{% endblock javascript%} {% block content %}
+<div class="card border-primary">
+	<div class="card-body">
+		<div class="bs-stepper">
+			<div class="bs-stepper-header" role="tablist">
+				<!-- your steps here -->
+				<div class="step" data-target="#instruction-part">
+					<button type="button" class="step-trigger" role="tab" aria-controls="instruction-part" id="instruction-part-trigger">
+						<span class="bs-stepper-circle">1</span>
+						<span class="bs-stepper-label">ขั้นตอน</span>
+					</button>
+				</div>
+				<div class="line"></div>
+				<div class="step" data-target="#filetype-part">
+					<button type="button" class="step-trigger" role="tab" aria-controls="filetype-part" id="filetype-part-trigger">
+						<span class="bs-stepper-circle">2</span>
+						<span class="bs-stepper-label">ประเภทไฟล์</span>
+					</button>
+				</div>
+				<div class="line"></div>
+				<div class="step" data-target="#upload-part">
+					<button type="button" class="step-trigger" role="tab" aria-controls="upload-part" id="upload-part-trigger">
+						<span class="bs-stepper-circle">3</span>
+						<span class="bs-stepper-label">อัปโหลด</span>
+					</button>
+				</div>
+				<div class="line"></div>
+				<div class="step" data-target="#config-part">
+					<button type="button" class="step-trigger" role="tab" aria-controls="config-part" id="config-part-trigger">
+						<span class="bs-stepper-circle">4</span>
+						<span class="bs-stepper-label">แก้ไขข้อมูลเพิ่มเติม</span>
+					</button>
+				</div>
+				<div class="line"></div>
+				<div class="step" data-target="#verify-part">
+					<button type="button" class="step-trigger" role="tab" aria-controls="verify-part" id="verify-part-trigger">
+						<span class="bs-stepper-circle">5</span>
+						<span class="bs-stepper-label">ยืนยันข้อมูล</span>
+					</button>
+				</div>
+			</div>
+			<div class="bs-stepper-content">
+				<!-- your steps content here -->
+				<form method="post" enctype="multipart/form-data">
+					{% csrf_token %}
+					<div id="instruction-part" class="content" role="tabpanel" aria-labelledby="instruction-part-trigger">
+						<p>1</p>
+						<div class="advance-buttons">
+							<button type="button" class="btn btn-outline-success" onclick="stepper.next()" style="float: right">ต่อไป</button>
+						</div>
+					</div>
+					<div id="filetype-part" class="content" role="tabpanel" aria-labelledby="filetype-part-trigger">
+						<!-- <select id="type" name="type">
+							<option value="FB">Facebook/IG</option>
+							<option value="LP">Line(Post)</option>
+							<option value="LM">Line(Message)</option>
+							<option value="GC">Google Analytics(Campaign)</option>
+							<option value="GS">Google Analytics(Site Traffic)</option>
+						</select> -->
+						<div class="container d-flex justify-content-center">
+							<h1>ประเภทไฟล์</h1>
+						</div>
+						<div class="container d-flex justify-content-center main-content">
+							<div class="row g-5">
+								<div class="col">
+									<label for="facebook" class="option-item shadow">
+										<input type="radio" id="facebook" name="type" value="FB" class="checkbox" />
+										<div class="option-inner facebook">
+											<div class="tickmark"></div>
+											<div class="name">Facebook<br />/Instagram</div>
+										</div>
+									</label>
+								</div>
+								<div class="col">
+									<label for="linepost" class="option-item shadow">
+										<input type="radio" id="linepost" name="type" value="LP" class="checkbox" />
+										<div class="option-inner linepost">
+											<div class="tickmark"></div>
+											<div class="name">Line<br />(Post)</div>
+										</div>
+									</label>
+								</div>
+								<div class="col">
+									<label for="linemessage" class="option-item shadow">
+										<input type="radio" id="linemessage" name="type" value="LM" class="checkbox" />
+										<div class="option-inner linemessage">
+											<div class="tickmark"></div>
+											<div class="name">Line<br />(Message)</div>
+										</div>
+									</label>
+								</div>
+								<div class="col">
+									<label for="googlecampaign" class="option-item shadow">
+										<input type="radio" id="googlecampaign" name="type" value="GC" class="checkbox" />
+										<div class="option-inner googlecampaign">
+											<div class="tickmark"></div>
+											<div class="name">Google<br />(Campaign)</div>
+										</div>
+									</label>
+								</div>
+								<div class="col">
+									<label for="googlesitetraffic" class="option-item shadow">
+										<input type="radio" id="googlesitetraffic" name="type" value="GS" class="checkbox" />
+										<div class="option-inner googlesitetraffic">
+											<div class="tickmark"></div>
+											<div class="name">Google<br />(Site Traffic)</div>
+										</div>
+									</label>
+								</div>
+							</div>
+						</div>
+						<div id="noselectedalert"></div>
+						<div class="advance-buttons">
+							<button type="button" class="btn btn-outline-danger" onclick="stepper.previous()" style="float: left">กลับไปหน้าที่แล้ว</button>
+							<button type="button" class="btn btn-outline-success" onclick="nextP2()" style="float: right">ต่อไป</button>
+						</div>
+					</div>
+					<div id="upload-part" class="content" role="tabpanel" aria-labelledby="upload-part-trigger">
+						<div id="drop-box" class="container d-flex justify-content-center align-items-center">
+							<div style="display: block">
+								<div class="p d-flex justify-content-center">ลากและวางไฟล์เพื่ออัปโหลด หรือ</div>
+								<div class="d-flex justify-content-center"><input class="form-control" type="file" name="csvfile" id="fileinput" /></div>
+							</div>
+						</div>
+						<div id="nofilealert"></div>
+						<div class="advance-buttons">
+							<button type="button" class="btn btn-outline-danger" onclick="stepper.previous()" style="float: left">กลับไปหน้าที่แล้ว</button>
+							<button type="button" class="btn btn-outline-success" onclick="nextP3()" style="float: right">ต่อไป</button>
+						</div>
+					</div>
+					<div id="config-part" class="content" role="tabpanel" aria-labelledby="config-part-trigger">
+						<input id="date" name="date" class="form-control" type="date" />
+						<div class="advance-buttons">
+							<button type="button" class="btn btn-outline-danger" onclick="stepper.previous()" style="float: left">กลับไปหน้าที่แล้ว</button>
+							<button type="button" class="btn btn-outline-success" onclick="stepper.next()" style="float: right">ต่อไป</button>
+						</div>
+					</div>
+					<div id="verify-part" class="content" role="tabpanel" aria-labelledby="verify-part-trigger">
+						<p>5</p>
+						<div class="advance-buttons">
+							<button type="button" class="btn btn-outline-danger" onclick="prevP5()" style="float: left">กลับไปหน้าที่แล้ว</button>
+							<input class="btn btn-primary" type="submit" value="ยืนยัน" name="submit" style="float: right" />
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock content %}

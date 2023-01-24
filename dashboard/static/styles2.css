@@ -9,7 +9,7 @@
 
 :root{
     --body-color: #F8F4EA;
-    --sidebar-color: #e6e6e6e2;
+    --nav-color: #dcdcdce2;
     --primary-color: #579BB1;
     --primary-color-light: #ffffff;
     --toggle-color: #ECE8DD;
@@ -21,15 +21,14 @@
     --tran-05: all 0.5s ease;
 }
 
-body{
-    height: 100vh;
-    background: var(--body-color);
+/* body {
+    padding-top: 70px;
+} */
+
+.nav {
+    background-color: var(--nav-color);
 }
 
-.sidebar{
-    background: var(--sidebar-color);
-}
-
-.sidebar .header-text{
-    color: var(--text-color);
+.content {
+    margin: 15px 15px 15px 15px;
 }

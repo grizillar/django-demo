@@ -1,41 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      Site -{% block title %}
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Site -{% block title %} {% endblock %}</title>
 
-      {% endblock %}
-    </title>
+		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" />
+		<link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+		<link rel="stylesheet" href="/static/styles2.css" />
 
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" />
-    <link rel="stylesheet" href="/static/styles2.css" />
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+		<!-- Specific Styling -->
+		{% block stylesheets %} {% endblock %}
+	</head>
 
-    <!-- Specific Styling -->
-    {% block stylesheets %}
+	<body>
+		{% include 'component/navbar.html' %}
 
-    {% endblock %}
-  </head>
+		<main class="containter">
+			<div class="content">{% block content %} {% endblock %}</div>
+		</main>
 
-  <body>
-    <div class="container-fluid">
-      <div class="row flex-nowrap">
-        {% include 'component/sidebar2.html' %}
-        <div class="col py-3">
-          {% block content %}
+		<script src="/static/bootstrap/js/bootstrap.js"></script>
 
-          {% endblock %}
-        </div>
-      </div>
-    </div>
-
-    <script src="/static/bootstrap/js/bootstrap.js"></script>
-
-    {% block javascript %}
-
-    {% endblock %}
-  </body>
+		{% block javascript %} {% endblock %}
+	</body>
 </html>

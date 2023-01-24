@@ -10,12 +10,12 @@
 // var campaign = JSON.parse(campaignJSON);
 
 function getCampaignSize() {
-  return campaign.lenght;
+	return campaign.lenght;
 }
 
 function getCampaign() {
-  return campaign.cid;
+	return campaign.cid;
 }
 
 // console.log(campaignJSON);
-document.getElementById("data_count").innerHTML = "";
+// document.getElementById("data_count").innerHTML = "";

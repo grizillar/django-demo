@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo</title>
-</head>
-<body>
-    <p>This is DEMO page</p>
-    {% if campaignLength %}
-    <p id="data_count">Campaign data found: <b>{{campaignLength}}</b></p>
-    {% else %}
-    <p>No data found</p>
-    {% endif %}
-</body>
-<script>
-    var campaignJSON = '{{campaignJSON}}'
-</script>
-<script src="/static/dashboard/demo.js"></script>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Demo</title>
+	</head>
+	<body>
+		<p>This is DEMO page</p>
+		{% if campaignLength %}
+		<p id="data_count">Campaign data found: <b>{{campaignLength}}</b></p>
+		{% else %}
+		<p>No data found</p>
+		{% endif %}
+	</body>
+	<script>
+		var campaignLength = "{{campaignLength}}";
+	</script>
+	<script src="/static/dashboard/demo.js"></script>
 </html>

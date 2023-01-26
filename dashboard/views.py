@@ -47,13 +47,20 @@ def upload(request):
             else:
                 print("unmatch")
 
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect('/upload-success')
         else:
             print("file's not ok1")
     else:
-        print("file's not ok2")
         form = UploadFileForm()
-    return render(request, 'upload/upload2.html', {'form': form})
+    return render(request, 'upload/upload.html', {'form': form})
+
+
+def uploadsuccess(request):
+    campaignDF = handler.getAllCampaign()
+    context = {
+        'campaignLength': len(campaignDF),
+    }
+    return render(request, 'upload/upload-success.html', context)
 
 
 def base(request):

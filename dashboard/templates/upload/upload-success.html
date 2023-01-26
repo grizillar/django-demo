@@ -1,0 +1,15 @@
+{% extends 'layout/base.html' %} {% block title %} Success {% endblock %} {% block stylesheets %}
+<link rel="stylesheet" href="/static/upload/upload.css" />
+{%endblock stylesheets %} {% block javascript %} {% endblock javascript%} {% block content %}
+<div class="container">
+	<div class="card shadow">
+		<div class="card-body"></div>
+		<div class="alert alert-success sign" role="alert">
+			<h4 class="alert-heading">อัปโหลดข้อมูลสำเร็จ!</h4>
+			<p>ข้อมูลที่คุณอัปโหลดถูกนำเข้าสู่ระบบแล้ว โปรดเช็คความถูกต้องว่าข้อมูลที่คุณอัปโหลดเมื่อสักครู่อยู่บนระบบ</p>
+			<hr />
+			<p class="mb-0">จำนวนข้อมูลแคมเปญปัจจุบัน: <b>{{campaignLength}}</b></p>
+		</div>
+	</div>
+</div>
+{%endblock%}

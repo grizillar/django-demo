@@ -1,25 +1,117 @@
-{% extends 'layout/base.html' %} {% block title %}
-  Upload
-{% endblock %} {% block stylesheets %}
-
-{% endblock %} {% block content %}
-  <p>This is Upload page</p>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="csvfile" />
-    <select id="type" name="type">
-      <option value="FB">Facebook/IG</option>
-      <option value="LP">Line(Post)</option>
-      <option value="LM">Line(Message)</option>
-      <option value="GC">Google Analytics(Campaign)</option>
-      <option value="GS">Google Analytics(Site Traffic)</option>
-    </select>
-    <button type="button" data-bs-toggle="collapse" data-bs-target="#config" aria-expanded="false" aria-controls="collapseExample">Expand Config</button>
-    <div class="collapse" id="config">
-      <input id="date" name="date" class="form-control" type="date" />
-    </div>
-    <input type="submit" value="Upload" name="submit" />
-  </form>
-{% endblock %} {% block javascript %}
-  <script src="/static/upload/upload.js"></script>
+{% extends 'layout/base.html' %} {% block title %} Upload {% endblock %} {% block stylesheets %}
+<link rel="stylesheet" href="/static/upload/upload.css" />
+{%endblock stylesheets %} {% block javascript %}
+<script src="/static/upload/upload.js"></script>
+{% endblock javascript%} {% block content %}
+<div class="container">
+	<div class="card shadow">
+		<div class="card-body">
+			<h1>อัปโหลดข้อมูล</h1>
+			<form id="upload-form" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div>
+					<div class="container d-flex">
+						<h2>แพลตฟอร์ม</h2>
+					</div>
+					<div class="container d-flex">
+						<div class="row g-5">
+							<div class="col">
+								<label for="facebook" class="option-item shadow">
+									<input onclick="typeCheck()" type="radio" id="facebook" name="type" value="FB" class="checkbox" />
+									<div class="option-inner facebook d-flex align-items-center justify-content-center">
+										<!-- <div class="tickmark"></div> -->
+										<div style="display: block">
+											<i class="icon bi bi-facebook d-flex justify-content-center"></i>
+											<p class="d-flex justify-content-center icon-label">Facebook<br />/Instagram</p>
+										</div>
+									</div>
+								</label>
+							</div>
+							<div class="col">
+								<label for="linepost" class="option-item shadow">
+									<input onclick="typeCheck()" type="radio" id="linepost" name="type" value="LP" class="checkbox" />
+									<div class="option-inner linepost d-flex align-items-center justify-content-center">
+										<!-- <div class="tickmark"></div> -->
+										<div style="display: block">
+											<i class="icon bi bi-line d-flex justify-content-center"></i>
+											<p class="d-flex justify-content-center icon-label">Line<br />(Post)</p>
+										</div>
+									</div>
+								</label>
+							</div>
+							<div class="col">
+								<label for="linemessage" class="option-item shadow">
+									<input onclick="typeCheck()" type="radio" id="linemessage" name="type" value="LM" class="checkbox" />
+									<div class="option-inner linemessage d-flex align-items-center justify-content-center">
+										<div style="display: block">
+											<i class="icon bi bi-line d-flex justify-content-center"></i>
+											<p class="d-flex justify-content-center icon-label">Line<br />(Message)</p>
+										</div>
+									</div>
+								</label>
+							</div>
+							<div class="col">
+								<label for="googlecampaign" class="option-item shadow">
+									<input onclick="typeCheck()" type="radio" id="googlecampaign" name="type" value="GC" class="checkbox" />
+									<div class="option-inner googlecampaign d-flex align-items-center justify-content-center">
+										<div style="display: block">
+											<i class="icon bi bi-google d-flex justify-content-center"></i>
+											<p class="d-flex justify-content-center icon-label">Google<br />(Campaign)</p>
+										</div>
+									</div>
+								</label>
+							</div>
+							<div class="col">
+								<label for="googlesitetraffic" class="option-item shadow">
+									<input onclick="typeCheck()" type="radio" id="googlesitetraffic" name="type" value="GS" class="checkbox" />
+									<div class="option-inner googlesitetraffic d-flex align-items-center justify-content-center">
+										<div style="display: block">
+											<i class="icon bi bi-google d-flex justify-content-center"></i>
+											<p class="d-flex justify-content-center icon-label">Google<br />(Site Traffic)</p>
+										</div>
+									</div>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div id="W1" class="alert alert-warning sign hidden" role="alert">
+						<i class="bi bi-exclamation-triangle-fill"></i> <b>ข้อควรระวัง:</b> ไม่พบข้อมูลวันที่ในข้อมูลแคมเปญจากแพลตฟอร์ม Google โปรดเพิ่มวันที่ในส่วน "แก้ไขข้อมูลเพิ่มเติม"
+					</div>
+				</div>
+				<hr />
+				<div>
+					<div class="container d-flex">
+						<h2>ไฟล์</h2>
+					</div>
+					<div id="drop-box" class="container d-flex justify-content-center align-items-center">
+						<div style="display: block">
+							<div class="d-flex justify-content-center"><i id="upload-icon" class="bi bi-file-earmark-arrow-down-fill"></i></div>
+							<div class="p d-flex justify-content-center">ลากและวางไฟล์เพื่ออัปโหลด หรือ</div>
+							<div class="d-flex justify-content-center"><input onchange="uploadHandle()" class="form-control" type="file" name="csvfile" id="fileinput" /></div>
+						</div>
+					</div>
+				</div>
+				<hr />
+				<div id="config" class="hidden">
+					<div class="container d-flex">
+						<h2>แก้ไขข้อมูลเพิ่มเติม</h2>
+					</div>
+					<div class="container d-inline-flex align-items-center">
+						<p>ข้อมูลวันที่</p>
+						<input id="date" name="date" class="form-control" type="date" />
+						<a class="info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="ข้อมูลวันที่จะถูกเพิ่มเข้าไปในทุกๆ แคมเปญในการอัปโหลดครั้งนี้"><i class="bi bi-info-circle-fill"></i></a>
+					</div>
+					<hr />
+				</div>
+				<div id="E1" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E1):</b> พบไฟล์มากกว่า 1 ไฟล์</div>
+				<div id="E2" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E2):</b> ไฟล์ที่อัปโหลดไม่ตรงกับแพลตฟอร์มที่เลือก</div>
+				<div id="E3" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E3):</b> ไม่พบแพลตฟอร์มที่เลือก</div>
+				<div id="E4" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E4):</b> ไม่พบข้อมูลวันที่</div>
+				<div class="d-flex justify-content-end">
+					<button onclick="submitHandle()" type="button" class="btn btn-lg btn-success">อัปโหลด</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 {% endblock %}

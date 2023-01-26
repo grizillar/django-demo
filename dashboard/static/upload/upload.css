@@ -25,6 +25,10 @@
 	background-color: blue;
 }
 
+a {
+	color: black;
+}
+
 .main-content {
 	width: 100%;
 	display: block;
@@ -35,8 +39,8 @@
 .option-item {
 	display: block;
 	position: relative;
-	width: 175px;
-	height: 175px;
+	width: 150px;
+	height: 150px;
 }
 
 .option-inner {
@@ -59,6 +63,15 @@
 	left: 0;
 	z-index: 1;
 	opacity: 0;
+}
+
+.icon {
+	font-size: 2em;
+	margin-bottom: 5px;
+}
+
+.icon-label {
+	font-size: 11px;
 }
 
 .tickmark {
@@ -132,17 +145,48 @@
 }
 
 #drop-box {
-	width: 100%;
+	width: 80%;
 	height: 300px;
-	border: 4px dashed #232222;
+	border: 4px dashed #a5a5a5;
 	border-radius: 4px;
 	margin-bottom: 20px;
 }
 
+#upload-icon {
+	font-size: 3em;
+	margin-bottom: 3px;
+	color: #a5a5a5;
+}
+
+/* #config {
+	display: block;
+} */
+
+.hidden {
+	display: none;
+}
+
+#upload-icon.highlight {
+	color: #000000;
+}
+
 #drop-box.highlight {
-	border-color: #579bb1;
+	border-color: #000000;
 }
 
 /* #drop-box p {
 	margin-top: 0;
 } */
+
+#date {
+	width: 50%;
+	margin-left: 1rem;
+}
+
+.info-icon {
+	margin-left: 1rem;
+}
+
+.sign {
+	margin: 15px;
+}

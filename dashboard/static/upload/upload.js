@@ -2,6 +2,7 @@ var stepper;
 var selectedPlatform;
 var file;
 var additionalDate;
+var match;
 var form = document.getElementById("upload-form");
 var addconfig = document.getElementById("config");
 var input = document.getElementById("fileinput");
@@ -11,6 +12,7 @@ var E1 = document.getElementById("E1");
 var E2 = document.getElementById("E2");
 var E3 = document.getElementById("E3");
 var E4 = document.getElementById("E4");
+var E5 = document.getElementById("E5");
 
 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -23,11 +25,9 @@ function typeCheck() {
 	throwError(E3, false);
 	if (selectedPlatform == "GC") {
 		addconfig.classList.remove("hidden");
-		W1.classList.remove("hidden");
 		console.log("Warning: additional config");
 	} else {
 		addconfig.classList.add("hidden");
-		W1.classList.add("hidden");
 		document.getElementById("date").value = null;
 	}
 	if (file) {
@@ -84,6 +84,7 @@ function uploadHandle() {
 	file = input.files[0];
 	console.log(file);
 	throwError(E1, false);
+	throwError(E5, false);
 	matchCheck();
 }
 
@@ -99,9 +100,11 @@ function matchCheck() {
 		if (selectedPlatform) {
 			if (colCheck(colLength, selectedPlatform)) {
 				throwError(E2, false);
+				match = true;
 			} else {
 				throwError(E2, true);
 				console.log("Error: Not matching file type");
+				match = false;
 			}
 		} else {
 			throwError(E3, true);
@@ -134,19 +137,37 @@ function throwError(Error, mode) {
 	}
 }
 
-function checkGCDate() {
+function formCheck() {
 	additionalDate = document.getElementById("date").value;
+	if (!selectedPlatform) {
+		throwError(E3, true);
+		return false;
+	} else {
+		throwError(E3, false);
+	}
 	if (additionalDate == "" && selectedPlatform == "GC") {
 		throwError(E4, true);
 		return false;
 	} else {
 		throwError(E4, false);
-		return true;
 	}
+	if (!file) {
+		throwError(E5, true);
+		return false;
+	} else {
+		throwError(E5, false);
+		if (!match) {
+			throwError(E2, true);
+			return false;
+		} else {
+			throwError(E2, false);
+		}
+	}
+	return true;
 }
 
 function submitHandle() {
-	if (checkGCDate()) {
+	if (formCheck()) {
 		form.submit();
 	}
 	// if (checkGCDate) {

@@ -1,76 +1,242 @@
-{% extends "layout/base.html" %} {% block title %} Dashboard {% endblock title %} {% block stylesheets %}{%endblock stylesheets %} {% block content %}
-<p>This is DASHBOARD page</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
-<p>.</p>
+{% extends 'layout/base.html' %} {% block title %} Dashboard {% endblock %} {% block stylesheets %}
+<link rel="stylesheet" href="/static/dashboard/dashboard.css" />
+{% endblock %} {% block javascript %}
+<script>
+	var summaryJSON = "{{ summaryJSON }}";
+	var CPRJSON = "{{ CPRJSON }}";
+	var summaryPMJSON = "{{ summaryPMJSON }}";
+	var startdate = "{{ start_date }}";
+	var enddate = "{{ end_date }}";
+	var platform = "{{ platform }}";
+	var single_selector = "{{ single_selector }}";
+	var multiple_selector = "{{ multiple_selector }}";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.0/dist/chart.umd.min.js"></script>
+<script src="/static/dashboard/dashboard.js"></script>
+<script src="/static/dashboard/chart.js"></script>
+{% endblock %} {% block content %}
+<div class="container">
+	<div>
+		<div class="d-flex justify-content-end">
+			<button id="filter-button" class="btn override" type="button" data-bs-toggle="collapse" data-bs-target="#queryEditor" aria-expanded="false" aria-controls="queryEditor"><i class="bi bi-funnel-fill"></i> ตัวกรอง</button>
+		</div>
+		<div class="collapse" id="queryEditor">
+			<div class="card card-body">
+				<form id="query-form" onsubmit="querySubmit()">
+					<div class="row">
+						<div class="col">
+							<p style="font-size: large"><strong>ช่วงเวลา</strong></p>
+							<label for="startdate">วันที่ต้น</label>
+							<input id="startdate" name="startdate" class="form-control query-date-input" type="date" />
+							<label for="enddate">วันที่ปลาย</label>
+							<input id="enddate" name="enddate" class="form-control query-date-input" type="date" />
+						</div>
+						<div class="col">
+							<p style="font-size: large"><strong>แพลตฟอร์ม</strong></p>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="1" name="platform-query" checked />
+								<label class="form-check-label">Facebook</label>
+							</div>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="2" name="platform-query" checked />
+								<label class="form-check-label">Instagram</label>
+							</div>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="3" name="platform-query" checked />
+								<label class="form-check-label">Line</label>
+							</div>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="4" name="platform-query" checked />
+								<label class="form-check-label">Google Ads</label>
+							</div>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="5" name="platform-query" checked />
+								<label class="form-check-label">Google Organic</label>
+							</div>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="6" name="platform-query" checked />
+								<label class="form-check-label">Website</label>
+							</div>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" id="7" name="platform-query" checked />
+								<label class="form-check-label">Other</label>
+							</div>
+						</div>
+						<div class="col">
+							<p style="font-size: large"><strong>ตัวเลือกข้อมูลแบบเดี่ยว</strong></p>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="spending" />
+								<label class="form-check-label"> Spending </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="reach" />
+								<label class="form-check-label"> Reach </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="impression" />
+								<label class="form-check-label"> Impression </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="engagement" />
+								<label class="form-check-label"> Engagement </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="user" />
+								<label class="form-check-label"> User </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="new_user" />
+								<label class="form-check-label"> New User </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="order" />
+								<label class="form-check-label"> Order </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="single-selector" id="revenue" />
+								<label class="form-check-label"> Revenue </label>
+							</div>
+						</div>
+						<div class="col">
+							<p style="font-size: large"><strong>ตัวเลือกข้อมูลแบบผสม</strong></p>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="spending" />
+								<label class="form-check-label"> Spending </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="reach" />
+								<label class="form-check-label"> Reach </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="impression" />
+								<label class="form-check-label"> Impression </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="engagement" />
+								<label class="form-check-label"> Engagement </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="user" />
+								<label class="form-check-label"> User </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="new_user" />
+								<label class="form-check-label"> New User </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="order" />
+								<label class="form-check-label"> Order </label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="multiple-selector" id="revenue" />
+								<label class="form-check-label"> Revenue </label>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="d-flex justify-content-end query-submit-buttons">
+							<!-- <button type="button" onclick="testbutton()" class="btn override">ทดสอบ</button> -->
+							<button type="button" onclick="queryClear()" class="btn btn-danger override">ล้าง</button>
+							<button type="button" onclick="querySubmit()" class="btn btn-success override">ยืนยัน</button>
+							<!-- <button type="submit" class="btn btn-success override">ยืนยัน</button> -->
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-9">
+			<div class="card">
+				<div class="card-body">
+					<table class="table cell">
+						<thead class="table-dark">
+							<tr>
+								<th rowspan="2" scope="col">#</th>
+								<th rowspan="2" scope="col">Platform</th>
+								<th rowspan="2" scope="col">Spending</th>
+								<th colspan="2" scope="col">Awareness</th>
+								<th colspan="1" scope="col">Interest</th>
+								<th colspan="2" scope="col">Desire</th>
+								<th colspan="2" scope="col">Action</th>
+							</tr>
+							<tr>
+								<th scope="col">Reach</th>
+								<th scope="col">Impression</th>
+								<th scope="col">Engagement</th>
+								<th scope="col">User</th>
+								<th scope="col">New User</th>
+								<th scope="col">Order</th>
+								<th scope="col">Revenue</th>
+							</tr>
+						</thead>
+						<tbody id="db1"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-3 d-flex">
+			<div class="card">
+				<div class="card-body">
+					<!-- <div class="d-flex justify-content-center align-items-center">
+						<p><b>จำนวนผู้ใช้งาน</b></p>
+					</div> -->
 
-{% endblock content %}
+					<div class="d-flex justify-content-center align-items-center">
+						<canvas id="donut-1"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-2 d-flex">
+			<div class="card w-100">
+				<div class="card-body">
+					<p>Empty card</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-10">
+			<div class="card">
+				<div class="card-body">
+					<table class="table cell">
+						<thead class="table-dark">
+							<tr>
+								<th rowspan="2" scope="col">Objective</th>
+								<th rowspan="2" scope="col">Spending</th>
+								<th colspan="2" scope="col">Awareness</th>
+								<th colspan="2" scope="col">Interest</th>
+								<th colspan="3" scope="col">Desire</th>
+								<th colspan="1" scope="col">Action</th>
+							</tr>
+							<tr>
+								<th scope="col">Cost/<br />Reach</th>
+								<th scope="col">Cost/<br />Impression</th>
+								<th scope="col">Cost/<br />Engagement</th>
+								<th scope="col">Cost/<br />VideoView</th>
+								<th scope="col">Cost/<br />LandingPage</th>
+								<th scope="col">Cost/<br />ProductView</th>
+								<th scope="col">Cost/<br />AddtoCartw</th>
+								<th scope="col">Cost/<br />Purchase</th>
+							</tr>
+						</thead>
+						<tbody id="db2"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<div id="g-l1">
+						<canvas id="line-1"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

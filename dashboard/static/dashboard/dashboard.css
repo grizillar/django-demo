@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500&display=swap");
+
+.form-check-input:checked {
+	background-color: var(--primary-color);
+	border-color: var(--primary-color);
+}
+
+#filter-button:hover {
+	color: var(--primary-color);
+}
+
+#queryEditor {
+	margin: 15px;
+}
+
+.row {
+	margin-top: 1rem;
+}
+
+.col {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.blue {
+	background-color: blue;
+}
+
+.red {
+	background-color: red;
+}
+
+.green {
+	background-color: green;
+}
+
+th {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.query-date-input {
+	width: 100%;
+}
+
+.current-dashboard {
+	color: var(--primary-color);
+}
+
+.query-submit-buttons {
+	margin-top: 15px;
+}
+
+.query-submit-buttons button {
+	margin-left: 5px;
+}

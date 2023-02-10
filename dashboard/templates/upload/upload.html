@@ -6,12 +6,12 @@
 <div class="container">
 	<div class="card shadow">
 		<div class="card-body">
-			<h1>อัปโหลดข้อมูล</h1>
+			<!-- <h1>อัปโหลดข้อมูล</h1> -->
 			<form id="upload-form" method="post" enctype="multipart/form-data">
 				{% csrf_token %}
 				<div>
 					<div class="container d-flex">
-						<h2>แพลตฟอร์ม</h2>
+						<h2>เลือกแพลตฟอร์ม</h2>
 					</div>
 					<div class="container d-flex">
 						<div class="row g-5">
@@ -74,41 +74,42 @@
 							</div>
 						</div>
 					</div>
-					<div id="W1" class="alert alert-warning sign hidden" role="alert">
+					<!-- <div id="W1" class="alert alert-warning sign hidden" role="alert">
 						<i class="bi bi-exclamation-triangle-fill"></i> <b>ข้อควรระวัง:</b> ไม่พบข้อมูลวันที่ในข้อมูลแคมเปญจากแพลตฟอร์ม Google โปรดเพิ่มวันที่ในส่วน "แก้ไขข้อมูลเพิ่มเติม"
-					</div>
+					</div> -->
 				</div>
 				<hr />
 				<div>
 					<div class="container d-flex">
-						<h2>ไฟล์</h2>
+						<h2>เลือกไฟล์</h2>
 					</div>
 					<div id="drop-box" class="container d-flex justify-content-center align-items-center">
 						<div style="display: block">
 							<div class="d-flex justify-content-center"><i id="upload-icon" class="bi bi-file-earmark-arrow-down-fill"></i></div>
 							<div class="p d-flex justify-content-center">ลากและวางไฟล์เพื่ออัปโหลด หรือ</div>
 							<div class="d-flex justify-content-center"><input onchange="uploadHandle()" class="form-control" type="file" name="csvfile" id="fileinput" /></div>
+							<div class="p d-flex justify-content-center" style="font-size: smaller">(เลือกได้เพียง 1 ไฟล์เท่านั้น)</div>
 						</div>
 					</div>
 				</div>
-				<hr />
 				<div id="config" class="hidden">
 					<div class="container d-flex">
-						<h2>แก้ไขข้อมูลเพิ่มเติม</h2>
+						<h4>เพิ่มข้อมูล</h4>
 					</div>
 					<div class="container d-inline-flex align-items-center">
-						<p>ข้อมูลวันที่</p>
+						<p style="margin-bottom: 0">วันที่</p>
 						<input id="date" name="date" class="form-control" type="date" />
-						<a class="info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="ข้อมูลวันที่จะถูกเพิ่มเข้าไปในทุกๆ แคมเปญในการอัปโหลดครั้งนี้"><i class="bi bi-info-circle-fill"></i></a>
+						<a class="info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="วันที่จะถูกเพิ่มในทุกแคมเปญของไฟล์นี้"><i class="bi bi-info-circle-fill"></i></a>
 					</div>
 					<hr />
 				</div>
-				<div id="E1" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E1):</b> พบไฟล์มากกว่า 1 ไฟล์</div>
-				<div id="E2" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E2):</b> ไฟล์ที่อัปโหลดไม่ตรงกับแพลตฟอร์มที่เลือก</div>
-				<div id="E3" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E3):</b> ไม่พบแพลตฟอร์มที่เลือก</div>
-				<div id="E4" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด(E4):</b> ไม่พบข้อมูลวันที่</div>
+				<div id="E1" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E1):</b> สามารถอัปโหลดได้ 1 ไฟล์เท่านั้น</div>
+				<div id="E2" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E2):</b> รูปแบบไฟล์ไม่ตรงกับแพลตฟอร์มที่เลือก</div>
+				<div id="E3" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E3):</b> กรุณาเลือกแพลตฟอร์ม</div>
+				<div id="E4" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E4):</b> กรุณากรอกวันที่</div>
+				<div id="E5" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E5):</b> กรุณาเลือกไฟล์</div>
 				<div class="d-flex justify-content-end">
-					<button onclick="submitHandle()" type="button" class="btn btn-lg btn-success">อัปโหลด</button>
+					<button onclick="submitHandle()" type="button" class="btn btn-lg btn-success override">อัปโหลด</button>
 				</div>
 			</form>
 		</div>

@@ -22,21 +22,13 @@
 	margin-right: 5px;
 }
 
-.blue {
-	background-color: blue;
-}
-
-.red {
-	background-color: red;
-}
-
-.green {
-	background-color: green;
-}
-
 th {
 	text-align: center;
 	vertical-align: middle;
+}
+
+.cell-highlight {
+	background-color: var(--primary-color-light);
 }
 
 .query-date-input {

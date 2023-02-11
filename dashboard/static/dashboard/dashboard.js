@@ -8,8 +8,8 @@ multiple_selector = multiple_selector.split(",");
 const platform_range = Object.keys(summary.pid).length;
 const objective_range = Object.keys(costPerResult.objective).length;
 
-construct_table(summary, "db1", platform_range);
-construct_table(costPerResult, "db2", objective_range);
+construct_table(summary, "db1", platform_range, "a");
+construct_table(costPerResult, "db2", objective_range, "b");
 
 function initParams() {
 	document.getElementById("startdate").value = startdate;
@@ -19,6 +19,16 @@ function initParams() {
 	fillCheckbox("multiple-selector", multiple_selector);
 }
 initParams();
+
+// function highlightCostPerResult(table_code) {
+// 	for (let i = 0; i < objective_range; i++) {
+// 		var objective = costPerResult.objective[i];
+// 		if (objective == "reach") {
+// 			document.getElementById(`${table_code}-${i}-2`).classList.add("cell-highlight");
+// 			document.getElementById(`${table_code}-${i}-3`).classList.add("cell-highlight");
+// 		}
+// 	}
+// }
 
 function fillCheckboxPlatform(groupName, arr) {
 	var checkedBoxes = document.querySelectorAll(`input[name=${groupName}]`);
@@ -49,16 +59,17 @@ function fillRadio(groupName, target) {
 	}
 }
 
-function construct_table(data_object, element_id, range) {
+function construct_table(data_object, element_id, range, table_code) {
 	var str = "";
 	for (let i = 0; i < range; i++) {
-		str += construct_row(data_object, i);
+		str += construct_row(data_object, i, table_code);
 	}
 	document.getElementById(element_id).innerHTML = str;
 }
 
-function construct_row(data_object, num) {
-	var str = "<tr>";
+function construct_row(data_object, num, table_code) {
+	var str = `<tr>`;
+	let col = 0;
 	for (const [key, value] of Object.entries(data_object)) {
 		let cell;
 		if (value[num] === null || value[num] === undefined) {
@@ -68,7 +79,8 @@ function construct_row(data_object, num) {
 		} else {
 			cell = value[num];
 		}
-		str += `<td>${cell}</td>`;
+		str += `<td id="${table_code}-${num}-${col}">${cell}</td>`;
+		col++;
 	}
 	return str;
 }

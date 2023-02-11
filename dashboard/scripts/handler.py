@@ -13,9 +13,24 @@ HOST = 'localhost'
 PORT = '1433'
 DRIVER = 'ODBC Driver 17 for SQL Server'
 
+# connection_string = (
+#     r"Driver=ODBC Driver 17 for SQL Server;"
+#     r"Server=;"
+#     r"Database=AIDAChula;"
+#     r"UID=;"
+#     r"PWD=;"
+#     r"Thrusted_Connection=yes;"
+# )
+
+# connection_url = sa.engine.URL.create(
+#     "mssql.pyodbc",
+#     query={"odbc_connect": connection_string}
+# )
+
+# engine = sa.create_engine(connection_url)
+
 engine = sa.create_engine(
-    f'mssql+pyodbc://{USER}:{PASSWORD}@{HOST}/{DATABASE}?driver={DRIVER}'
-)
+    f'mssql+pyodbc://{USER}:{PASSWORD}@{HOST}/{DATABASE}?driver={DRIVER}')
 
 
 def applyDate(df, date):
@@ -123,6 +138,8 @@ def getAllSummary(startdate=None, enddate=None, platform=None):
 
     return summary
 
+# Note: excluding NAN (large data too)
+
 
 def getCostPerResult(startdate=None, enddate=None, platform=None):
     startdate, enddate, platform = normalizeQueryParams(
@@ -142,7 +159,7 @@ def getCostPerResult(startdate=None, enddate=None, platform=None):
             ROUND(SUM(c.spending)/ NULLIF(SUM(c.add_to_cart), 0), 3) as 'cost/add_to_cart',
             ROUND(SUM(c.spending)/ NULLIF(SUM(c.purchase), 0), 3) as 'cost/purchase'
         FROM dbo.Campaign as c
-        WHERE c.pid IN {platform} AND c.objective != '0' AND c.objective != 'actions:onsite_conversion.messaging_conversation_started_7d' AND c.objective != 'actions:rsvp' AND c.objective != 'estimated_ad_recallers' AND c.date BETWEEN '{startdate}' AND '{enddate}'
+        WHERE c.pid IN {platform} AND c.objective != 'nan' AND c.objective != '0' AND c.objective != 'actions:onsite_conversion.messaging_conversation_started_7d' AND c.objective != 'actions:rsvp' AND c.objective != 'estimated_ad_recallers' AND c.date BETWEEN '{startdate}' AND '{enddate}'
         GROUP BY c.objective
         ORDER BY CASE c.objective
             WHEN 'reach' THEN 1

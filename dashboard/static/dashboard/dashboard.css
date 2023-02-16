@@ -47,3 +47,48 @@ td {
 .query-submit-buttons button {
 	margin-left: 5px;
 }
+
+.section {
+	margin-top: 20px;
+	padding: 10px;
+	/* border-radius: 5px;
+	border: 2px solid;
+	color: var(--primary-color-light); */
+}
+
+.card-body > .graph-title {
+	color: black;
+	text-align: center;
+}
+
+.padding-little {
+	padding: 10px;
+}
+
+#chart-test-1 .card {
+	margin-bottom: 5px;
+}
+
+.hidden {
+	display: none;
+}
+
+.facebook_color {
+	background-color: #92c0ee;
+}
+
+.instagram_color {
+	background-color: #dce8b6;
+}
+
+.line_color {
+	background-color: #addcb1;
+}
+
+.google_color {
+	background-color: #eb8888;
+}
+
+.icon {
+	font-size: 1em;
+}

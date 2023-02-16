@@ -1,30 +1,82 @@
-var summary = JSON.parse(summaryJSON.replace(/&quot;/g, '"'));
-var costPerResult = JSON.parse(CPRJSON.replace(/&quot;/g, '"'));
-var summaryPerMonth = JSON.parse(summaryPMJSON.replace(/&quot;/g, '"'));
-var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
-var simpleCampaign = JSON.parse(simpleCampaignJSON.replace(/&quot;/g, '"'));
+var summary = jsonParseQuot(summaryJSON);
+var costPerResult = jsonParseQuot(CPRJSON);
+var summaryPerMonth = jsonParseQuot(summaryPMJSON);
+// var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
+var simpleCampaign = jsonParseQuot(simpleCampaignJSON);
+var platformCount = jsonParseQuot(platformCountJSON);
+var topCampaign = jsonParseQuot(topCampaignJSON);
+
+console.log(topCampaign);
+
+console.log(platformCount);
+
+var topCPRarray = [];
+if (topCPRSTR) {
+	topCPRarray = jsonParseQuotArray(topCPRSTR.split("|"));
+}
+
+console.log(topCPRarray);
 
 platform = platform.split(",");
 multiple_selector = multiple_selector.split(",");
 
 const platform_range = Object.keys(summary.pid).length;
+const platform_count_range = Object.keys(platformCount.pid).length;
 const objective_range = Object.keys(costPerResult.objective).length;
-const top_range = Object.keys(topCPO.cid).length;
+const top_range = Object.keys(topCPRarray[0].cid).length;
 
 construct_table(summary, "db1", platform_range, "a");
 construct_table(costPerResult, "db2", objective_range, "b");
-construct_table(getTopCostPerResult(topCPO, single_selector), "db3", top_range, "c");
 
 function initParams() {
 	document.getElementById("startdate").value = startdate;
 	document.getElementById("enddate").value = enddate;
 	fillCheckboxPlatform("platform-query", platform);
-	fillRadio("single-selector", single_selector);
 	fillCheckbox("multiple-selector", multiple_selector);
 
-	document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
+	fillCount();
+	fillTopRankTable("top-rank-CPR");
+
+	// document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
 }
 initParams();
+
+function fillCount() {
+	var c_fb = 0;
+	var c_ig = 0;
+	var c_ln = 0;
+	var c_gg = 0;
+	for (let i = 0; i < platform_count_range; i++) {
+		if (platformCount.pid[i] == "1") {
+			c_fb = platformCount.count[i];
+		}
+		if (platformCount.pid[i] == "2") {
+			c_ig = platformCount.count[i];
+		}
+		if (platformCount.pid[i] == "3") {
+			c_ln = platformCount.count[i];
+		}
+		if (platformCount.pid[i] == "4") {
+			c_gg = platformCount.count[i];
+		}
+	}
+	document.getElementById("fb_count").innerHTML = c_fb;
+	document.getElementById("ig_count").innerHTML = c_ig;
+	document.getElementById("ln_count").innerHTML = c_ln;
+	document.getElementById("gg_count").innerHTML = c_gg;
+}
+
+function jsonParseQuot(jsonForm) {
+	return JSON.parse(jsonForm.replace(/&quot;/g, '"'));
+}
+
+function jsonParseQuotArray(array) {
+	arr = [];
+	for (let i = 0; i < array.length; i++) {
+		arr.push(jsonParseQuot(array[i]));
+	}
+	return arr;
+}
 
 function capitalizeFirstLetter(string) {
 	return string
@@ -70,6 +122,58 @@ function fillRadio(groupName, target) {
 		if (radios[i].id == target) {
 			radios[i].checked = true;
 		}
+	}
+}
+
+function fillRatioDonut(target) {
+	target_div = document.getElementById(target);
+	for (let i = 0; i < multiple_selector.length; i++) {
+		target_div.innerHTML += `
+		<div class="col-3 d-flex">
+				<div class="card">
+					<div class="card-body donut-chart-card">
+						<p class="graph-title">แผนภาพเปรียบเทียบผลรวม<br />${capitalizeFirstLetter(multiple_selector[i])} ของแต่ละแพลตฟอร์ม</p>
+						<div class="d-flex justify-content-center align-items-center">
+							<canvas id="rd-${i}"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+}
+
+fillRatioDonut("chart-test-1");
+
+function fillTopRankTable(target) {
+	target_div = document.getElementById(target);
+	filterered_selector = [];
+	for (let i = 0; i < multiple_selector.length; i++) {
+		if (["reach", "impression", "engagement"].includes(multiple_selector[i])) {
+			filterered_selector.push(multiple_selector[i]);
+		}
+	}
+	for (let i = 0; i < topCPRarray.length; i++) {
+		target_div.innerHTML += `
+			<div class="col">
+			<div class="card">
+			<div class="card-body padding-little">
+				<p class="graph-title">แคมเปญ 5 อันดับสูงสุดตามค่า Cost/${capitalizeFirstLetter(filterered_selector[i])}</p>
+				<table class="table cell h-100">
+					<thead class="table-dark">
+						<tr>
+							<th scope="col">Rank</th>
+							<th scope="col">Campaign</th>
+							<th scope="col" id="topCPR-th-${i}"></th>
+						</tr>
+					</thead>
+					<tbody id="tb-topCPR-${i}"></tbody>
+				</table>
+			</div>
+		</div>
+		</div>`;
+		construct_table(getTopCostPerResult(topCPRarray[i], filterered_selector[i]), `tb-topCPR-${i}`, top_range, `c-${i}`);
+		document.getElementById(`topCPR-th-${i}`).innerHTML = `Cost/<br />${capitalizeFirstLetter(filterered_selector[i])}`;
 	}
 }
 
@@ -182,9 +286,6 @@ function querySubmit() {
 	}
 	if (platform != "") {
 		ref = ref + `&platform=${platform}`;
-	}
-	if (single_selector != "") {
-		ref = ref + `&ss=${single_selector}`;
 	}
 	if (multiple_selector != "") {
 		ref = ref + `&ms=${multiple_selector}`;

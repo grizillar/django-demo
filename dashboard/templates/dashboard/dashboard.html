@@ -6,13 +6,14 @@
 	var summaryJSON = "{{ summaryJSON }}";
 	var CPRJSON = "{{ CPRJSON }}";
 	var summaryPMJSON = "{{ summaryPMJSON }}";
-	var topCPOJSON = "{{ topCPOJSON }}";
+	var topCPRSTR = "{{ topCPRSTR }}";
 	var simpleCampaignJSON = "{{ simpleCampaignJSON }}";
+	var platformCountJSON = "{{ platformCountJSON }}";
+	var topCampaignJSON = "{{ topCampaignJSON }}";
 
 	var startdate = "{{ start_date }}";
 	var enddate = "{{ end_date }}";
 	var platform = "{{ platform }}";
-	var single_selector = "{{ single_selector }}";
 	var multiple_selector = "{{ multiple_selector }}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.0/dist/chart.umd.min.js"></script>
@@ -66,43 +67,9 @@
 								<label class="form-check-label">Other</label>
 							</div>
 						</div>
+
 						<div class="col">
-							<p style="font-size: large"><strong>ตัวเลือกข้อมูลแบบเดี่ยว</strong></p>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="spending" />
-								<label class="form-check-label"> Spending </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="reach" />
-								<label class="form-check-label"> Reach </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="impression" />
-								<label class="form-check-label"> Impression </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="engagement" />
-								<label class="form-check-label"> Engagement </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="user" />
-								<label class="form-check-label"> User </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="new_user" />
-								<label class="form-check-label"> New User </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="order" />
-								<label class="form-check-label"> Order </label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="single-selector" id="revenue" />
-								<label class="form-check-label"> Revenue </label>
-							</div>
-						</div>
-						<div class="col">
-							<p style="font-size: large"><strong>ตัวเลือกข้อมูลแบบผสม</strong></p>
+							<p style="font-size: large"><strong>ตัวเลือกข้อมูล</strong></p>
 							<div class="form-check">
 								<input class="form-check-input" type="checkbox" name="multiple-selector" id="spending" />
 								<label class="form-check-label"> Spending </label>
@@ -149,121 +116,209 @@
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-9">
-			<div class="card">
-				<div class="card-body">
-					<table class="table cell">
-						<thead class="table-dark">
-							<tr>
-								<th rowspan="2" scope="col">#</th>
-								<th rowspan="2" scope="col">Platform</th>
-								<th rowspan="2" scope="col">Spending</th>
-								<th colspan="2" scope="col">Awareness</th>
-								<th colspan="1" scope="col">Interest</th>
-								<th colspan="2" scope="col">Desire</th>
-								<th colspan="2" scope="col">Action</th>
-							</tr>
-							<tr>
-								<th scope="col">Reach</th>
-								<th scope="col">Impression</th>
-								<th scope="col">Engagement</th>
-								<th scope="col">User</th>
-								<th scope="col">New User</th>
-								<th scope="col">Order</th>
-								<th scope="col">Revenue</th>
-							</tr>
-						</thead>
-						<tbody id="db1"></tbody>
-					</table>
+	<div class="shadow section">
+		<div class="row gx-3">
+			<div class="col-9">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title">ตาราง Summary {% if start_date %} ตั้งแต่วันที่ {{ start_date }} {% endif %} {% if end_date %} ถึงวันที่ {{ end_date }} {% endif %}</p>
+						<table class="table cell">
+							<thead class="table-dark">
+								<tr>
+									<th rowspan="2" scope="col">#</th>
+									<th rowspan="2" scope="col">Platform</th>
+									<th rowspan="2" scope="col">Spending</th>
+									<th colspan="2" scope="col">Awareness</th>
+									<th colspan="1" scope="col">Interest</th>
+									<th colspan="2" scope="col">Desire</th>
+									<th colspan="2" scope="col">Action</th>
+								</tr>
+								<tr>
+									<th scope="col">Reach</th>
+									<th scope="col">Impression</th>
+									<th scope="col">Engagement</th>
+									<th scope="col">User</th>
+									<th scope="col">New User</th>
+									<th scope="col">Order</th>
+									<th scope="col">Revenue</th>
+								</tr>
+							</thead>
+							<tbody id="db1"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-3 d-flex">
+				<div class="container">
+					<div class="row d-flex">
+						<div class="card facebook_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-facebook"></i> Facebook</div>
+									<div><b id="fb_count"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card instagram_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-instagram"></i> Instagram</div>
+									<div><b id="ig_count"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card line_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-line"></i> Line</div>
+									<div><b id="ln_count"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card google_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-google"></i> Google Ads</div>
+									<div><b id="gg_count"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div>Total Campaign</div>
+									<div><b id="campaign_count">{{ campaign_count }}</b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div>Total Site Traffic</div>
+									<div><b id="sitetraffic_count">{{ sitetraffic_count }}</b></div>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-		<div class="col-3 d-flex">
-			<div class="card">
-				<div class="card-body">
-					<!-- <div class="d-flex justify-content-center align-items-center">
+		<div class="row">
+			<div class="col-3 d-flex">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title">แผนภาพเปรียบเทียบผลรวม<br />ข้อมูลของแต่ละแพลตฟอร์ม</p>
+						<!-- <div class="d-flex justify-content-center align-items-center">
 						<p><b>จำนวนผู้ใช้งาน</b></p>
 					</div> -->
 
-					<div class="d-flex justify-content-center align-items-center">
-						<canvas id="donut-1"></canvas>
+						<div class="d-flex justify-content-center align-items-center">
+							<canvas id="donut-1"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row" id="chart-test-1"></div>
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title" id="summary-per-month-title">กราฟผลรวม Reach, Impression, Engagementแต่ละเดือน</p>
+						<div id="g-l1">
+							<canvas id="line-1"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row test hidden">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title" id="summary-per-month-title-bar">กราฟผลรวมข้อมูลแต่ละเดือน</p>
+						<div id="g-l1">
+							<canvas id="line-1-test"></canvas>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="row">
-		<!-- <div class="col-2 d-flex">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<p class="graph-title" id="summary-per-month-title-bar">แคมเปญที่มีผลรวม Reach, Impression, Campaign สูงที่สุด 5 อันดับ</p>
+					<div id="g-l1">
+						<canvas id="stackbar-1"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="shadow section">
+		<div class="row">
+			<!-- <div class="col-2 d-flex">
 			<div class="card w-100">
 				<div class="card-body">
 					<p>Empty card</p>
 				</div>
 			</div>
 		</div> -->
-		<div class="col-12">
-			<div class="card">
-				<div class="card-body">
-					<table class="table cell">
-						<thead class="table-dark">
-							<tr>
-								<th rowspan="2" scope="col">Objective</th>
-								<th rowspan="2" scope="col">Spending</th>
-								<th colspan="2" scope="col">Awareness</th>
-								<th colspan="2" scope="col">Interest</th>
-								<th colspan="3" scope="col">Desire</th>
-								<th colspan="1" scope="col">Action</th>
-							</tr>
-							<tr>
-								<th scope="col">Cost/<br />Reach</th>
-								<th scope="col">Cost/<br />Impression</th>
-								<th scope="col">Cost/<br />Engagement</th>
-								<th scope="col">Cost/<br />VideoView</th>
-								<th scope="col">Cost/<br />LandingPage</th>
-								<th scope="col">Cost/<br />ProductView</th>
-								<th scope="col">Cost/<br />AddtoCartw</th>
-								<th scope="col">Cost/<br />Purchase</th>
-							</tr>
-						</thead>
-						<tbody id="db2"></tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-12">
-			<div class="card">
-				<div class="card-body">
-					<div id="g-l1">
-						<canvas id="line-1"></canvas>
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title">ตารางค่าเฉลี่ย Cost per Result</p>
+						<table class="table cell">
+							<thead class="table-dark">
+								<tr>
+									<th rowspan="2" scope="col">Objective</th>
+									<th rowspan="2" scope="col">Spending</th>
+									<th colspan="2" scope="col">Awareness</th>
+									<th colspan="2" scope="col">Interest</th>
+									<th colspan="3" scope="col">Desire</th>
+									<th colspan="1" scope="col">Action</th>
+								</tr>
+								<tr>
+									<th scope="col">Cost/<br />Reach</th>
+									<th scope="col">Cost/<br />Impression</th>
+									<th scope="col">Cost/<br />Engagement</th>
+									<th scope="col">Cost/<br />VideoView</th>
+									<th scope="col">Cost/<br />LandingPage</th>
+									<th scope="col">Cost/<br />ProductView</th>
+									<th scope="col">Cost/<br />AddtoCartw</th>
+									<th scope="col">Cost/<br />Purchase</th>
+								</tr>
+							</thead>
+							<tbody id="db2"></tbody>
+						</table>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="row">
-		<div class="col-6">
-			<div class="card">
-				<div class="card-body">
-					<table class="table cell">
-						<thead class="table-dark">
-							<tr>
-								<th scope="col">Rank</th>
-								<th scope="col">Campaign</th>
-								<th scope="col" id="topCPO-th"></th>
-							</tr>
-						</thead>
-						<tbody id="db3"></tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-		<div class="col-6">
-			<div class="card h-100">
-				<div class="card-body">
-					<div class="g-s1">
-						<canvas id="scatter-1"></canvas>
+
+		<div class="row gx-0" id="top-rank-CPR"></div>
+
+		<div class="row hidden">
+			<div class="col-12">
+				<div class="card h-100">
+					<div class="card-body">
+						<p class="graph-title">แผนภาพการกระจายของแต่ละข้อมูลและค่าใช้จ่าย</p>
+						<div class="g-s1">
+							<canvas id="scatter-1"></canvas>
+						</div>
 					</div>
 				</div>
 			</div>

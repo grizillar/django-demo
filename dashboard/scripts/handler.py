@@ -112,6 +112,40 @@ def getSiteTrafficLength():
     return int(pd.read_sql_query(query, con=engine).iloc[0])
 
 
+def getPlatformCount(startdate=None, enddate=None, platform=None):
+
+    startdate, enddate, platform = normalizeQueryParams(
+        startdate, enddate, platform)
+
+    platform = listToSQLString(platform)
+
+    query = f"""
+        SELECT c.pid as 'pid', COUNT(c.cid) as 'count'
+        FROM Campaign as c
+        WHERE c.date BETWEEN '{startdate}' AND '{enddate}' AND c.pid IN {platform}
+        GROUP BY c.pid
+    """
+
+    platformCount = pd.read_sql_query(query, con=engine)
+    return platformCount
+
+
+def getCampaignCount(startdate=None, enddate=None, platform=None):
+
+    startdate, enddate, platform = normalizeQueryParams(
+        startdate, enddate, platform)
+
+    platform = listToSQLString(platform)
+
+    query = f"""
+        SELECT count(c.cid)
+        FROM Campaign as c
+        WHERE c.date BETWEEN '{startdate}' AND '{enddate}' AND c.pid IN {platform}
+    """
+
+    return int(pd.read_sql_query(query, con=engine).iloc[0])
+
+
 def getAllSummary(startdate=None, enddate=None, platform=None):
 
     startdate, enddate, platform = normalizeQueryParams(
@@ -233,6 +267,32 @@ def getTopCostPerCampaign(startdate=None, enddate=None, platform=None, top=5, or
         " ", " "], regex=True, inplace=True)
 
     return topCPO
+
+
+def getTopCampaign(startdate=None, enddate=None, platform=None):
+
+    startdate, enddate, platform = normalizeQueryParams(
+        startdate, enddate, platform)
+
+    platform = listToSQLString(platform)
+
+    query = f"""
+        SELECT TOP(5) c.cid, c.name, c.pid,
+	        c.reach,
+			c.impression,
+			c.engagement,
+			(c.reach + c.impression + c.engagement) as total
+        FROM dbo.Campaign as c
+        WHERE c.pid IN {platform} AND c.date BETWEEN '{startdate}' AND '{enddate}'
+        ORDER BY total DESC
+        """
+
+    topCampaign = pd.read_sql_query(query, con=engine)
+
+    topCampaign.replace(to_replace=[r'\\t|\\n|\\r|\\"', '\t|\n|\r|\"'], value=[
+        " ", " "], regex=True, inplace=True)
+
+    return topCampaign
 
 
 def getSimpleCampaign(startdate=None, enddate=None, platform=None):

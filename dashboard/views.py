@@ -20,7 +20,6 @@ def dashboard(request):
     sdate = request.GET.get("startdate")
     edate = request.GET.get("enddate")
     platform = request.GET.get("platform")
-    single_selector = request.GET.get("ss")
     multiple_selector = request.GET.get("ms")
 
     if platform is not None:
@@ -33,29 +32,40 @@ def dashboard(request):
         multiple_selector = multiple_selector.split(",")
         context_multiple_selector = ','.join(e for e in multiple_selector)
     else:
+        multiple_selector = MULTIPLE_SELECTOR_DEFAULT.split(",")
         context_multiple_selector = MULTIPLE_SELECTOR_DEFAULT
-
-    if single_selector is None:
-        single_selector = SINGLE_SELECTOR_DEFAULT
 
     summary = handler.getAllSummary(sdate, edate, platform)
     costPerResult = handler.getCostPerResult(sdate, edate, platform)
     summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
-    topCPO = handler.getTopCostPerCampaign(
-        sdate, edate, platform, order=single_selector)
+
+    topCPRarray = []
+    for s in multiple_selector:
+        if s in ["reach", "impression", "engagement"]:
+            topCPRarray.append(handler.getTopCostPerCampaign(
+                sdate, edate, platform, order=s).to_json())
+    topCPRarray = '|'.join(a for a in topCPRarray)
+
     simpleCampaign = handler.getSimpleCampaign(sdate, edate, platform)
+    platformCount = handler.getPlatformCount(sdate, edate, platform)
+    campaignCount = handler.getCampaignCount(sdate, edate, platform)
+    siteTrafficCount = handler.getSiteTrafficLength()
+    topCampaign = handler.getTopCampaign(sdate, edate, platform)
 
     context = {
         "start_date": sdate,
         "end_date": edate,
         "platform": context_platform,
-        "single_selector": single_selector,
         "multiple_selector": context_multiple_selector,
         "summaryJSON": summary.to_json(),
         "CPRJSON": costPerResult.to_json(),
         "summaryPMJSON": summaryPerMonth.to_json(),
-        "topCPOJSON": topCPO.to_json(),
+        "topCPRSTR": topCPRarray,
         "simpleCampaignJSON": simpleCampaign.to_json(),
+        "platformCountJSON": platformCount.to_json(),
+        "campaign_count": campaignCount,
+        "sitetraffic_count": siteTrafficCount,
+        "topCampaignJSON": topCampaign.to_json(),
 
     }
 

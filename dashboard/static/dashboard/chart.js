@@ -3,6 +3,9 @@ LIMIT = {
 	count: 400000,
 };
 
+var earliestMonth;
+var lastestMonth;
+
 function monthof(index) {
 	const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 	return monthNames[index - 1];
@@ -10,8 +13,8 @@ function monthof(index) {
 
 function formDateRange() {
 	var monthLength = Object.keys(summaryPerMonth.month).length;
-	var earliestMonth = [summaryPerMonth.month[0], summaryPerMonth.year[0]];
-	var lastestMonth = [summaryPerMonth.month[monthLength - 1], summaryPerMonth.year[monthLength - 1]];
+	earliestMonth = [summaryPerMonth.month[0], summaryPerMonth.year[0]];
+	lastestMonth = [summaryPerMonth.month[monthLength - 1], summaryPerMonth.year[monthLength - 1]];
 
 	var currmonth = earliestMonth[0];
 	var curryear = earliestMonth[1];
@@ -35,6 +38,11 @@ function formDateRange() {
 	}
 
 	return [month, year];
+}
+
+function fillTitleNameSPMT(target_p, earliestMonth, lastestMonth) {
+	var target = document.getElementById(target_p);
+	target.innerHTML += `ตั้งแต่ ${monthof(earliestMonth[0])}, ${earliestMonth[1]} ถึง ${monthof(lastestMonth[0])}, ${lastestMonth[1]}`;
 }
 
 function interpretDate(range) {
@@ -82,7 +90,14 @@ function formArray(data) {
 	return arr;
 }
 
-function formDatasetWithDate(data, labels) {
+function formDatasetWithDate(data, target_list) {
+	// var labels = [];
+	// for (let i = 0; i < target_list.length; i++) {
+	// 	if (["spending", "reach", "impression", "engagement"].includes(target_list[i])) {
+	// 		labels.push(target_list[i]);
+	// 	}
+	// }
+	var labels = ["reach", "impression", "engagement"];
 	var datasets = [];
 	for (let i = 0; i < labels.length; i++) {
 		var label = {
@@ -136,37 +151,75 @@ function capitalizeFirstLetter(string) {
 		.join(" ");
 }
 
+function formRatioDonutData(label) {
+	return {
+		labels: formArray(summary.platform_name),
+		datasets: [
+			{
+				data: formArray(summary[label]),
+				// backgroundColor: ["rgb(255, 51, 51)", "rgb(255, 255, 102)", "rgb(255, 205, 86)"],
+				hoverOffset: 10,
+			},
+		],
+	};
+}
+
+function formRatioDonutDatasets(target_list) {
+	datasets = [];
+	for (let i = 0; i < target_list.length; i++) {
+		datasets.push({
+			label: target_list[i],
+			data: formArray(summary[target_list[i]]),
+			backgroundColor: filteredPlatformColor,
+			hoverOffset: 4,
+		});
+	}
+	return datasets;
+}
+
+function filteredPlatformColor() {
+	const color_range = ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"];
+	var color = [];
+	platform.forEach((p) => {
+		color.push(color_range[parseInt(p) - 1]);
+	});
+	return color;
+}
+
+function fillDount() {
+	for (let i = 0; i < multiple_selector.length; i++) {
+		var data_d = {
+			labels: formArray(summary.platform_name),
+			datasets: [
+				{
+					label: multiple_selector[i],
+					data: formArray(summary[multiple_selector[i]]),
+					backgroundColor: filteredPlatformColor,
+					hoverOffset: 4,
+				},
+			],
+		};
+		var config_d = {
+			type: "doughnut",
+			data: data_d,
+			options: {
+				respondsive: true,
+				plugins: {
+					title: {
+						display: false,
+						text: `${capitalizeFirstLetter("reach")} Count`,
+					},
+				},
+			},
+		};
+		new Chart(document.getElementById(`rd-${i}`), config_d);
+	}
+}
+
 const data_d1 = {
 	labels: formArray(summary.platform_name),
-	datasets: [
-		{
-			label: "Label here",
-			data: formArray(summary[single_selector]),
-			// backgroundColor: ["rgb(255, 99, 132)", "rgb(54, 162, 235)", "rgb(255, 205, 86)"],
-			hoverOffset: 4,
-		},
-	],
+	datasets: formRatioDonutDatasets(multiple_selector),
 };
-
-// const data_l1 = {
-// 	labels: interpretDate(formDateRange()),
-// 	datasets: [
-// 		{
-// 			label: "Reach",
-// 			data: fillDataByDate(summaryPerMonth, summaryPerMonth.reach, formDateRange()),
-// 			// borderColor: Utils.CHART_COLORS.red,
-// 			// backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
-// 		},
-// 		{
-// 			label: "Impression",
-// 			data: fillDataByDate(summaryPerMonth, summaryPerMonth.impression, formDateRange()),
-// 		},
-// 		{
-// 			label: "Engagement",
-// 			data: fillDataByDate(summaryPerMonth, summaryPerMonth.engagement, formDateRange()),
-// 		},
-// 	],
-// };
 
 const data_l1 = {
 	labels: interpretDate(formDateRange()),
@@ -175,6 +228,24 @@ const data_l1 = {
 
 const data_s1 = {
 	datasets: formScatterDataset(simpleCampaign, multiple_selector),
+};
+
+const data_sb1 = {
+	labels: formArray(topCampaign.name),
+	datasets: [
+		{
+			label: "Reach",
+			data: formArray(topCampaign.reach),
+		},
+		{
+			label: "Impression",
+			data: formArray(topCampaign.impression),
+		},
+		{
+			label: "Engagement",
+			data: formArray(topCampaign.engagement),
+		},
+	],
 };
 
 const config_l1 = {
@@ -187,7 +258,24 @@ const config_l1 = {
 				position: "top",
 			},
 			title: {
-				display: true,
+				display: false,
+				text: "Summation per Month",
+			},
+		},
+	},
+};
+
+const config_l1_test = {
+	type: "bar",
+	data: data_l1,
+	options: {
+		responsive: true,
+		plugins: {
+			legend: {
+				position: "top",
+			},
+			title: {
+				display: false,
 				text: "Summation per Month",
 			},
 		},
@@ -201,8 +289,8 @@ const config_d1 = {
 		respondsive: true,
 		plugins: {
 			title: {
-				display: true,
-				text: `${capitalizeFirstLetter(single_selector)} Count`,
+				display: false,
+				text: `${capitalizeFirstLetter("reach")} Count`,
 			},
 		},
 	},
@@ -212,6 +300,9 @@ const config_s1 = {
 	type: "scatter",
 	data: data_s1,
 	options: {
+		animation: {
+			duration: 0,
+		},
 		scales: {
 			x: {
 				type: "linear",
@@ -227,10 +318,33 @@ const config_s1 = {
 				},
 			},
 			title: {
-				display: true,
+				display: false,
 				text: `Cost Effective Scatterplot`,
 			},
 		},
+	},
+};
+
+const config_sb1 = {
+	type: "bar",
+	data: data_sb1,
+	options: {
+		plugins: {
+			title: {
+				display: false,
+				text: "",
+			},
+		},
+		responsive: true,
+		scales: {
+			x: {
+				stacked: true,
+			},
+			y: {
+				stacked: true,
+			},
+		},
+		indexAxis: "y",
 	},
 };
 
@@ -243,6 +357,14 @@ new Chart(document.getElementById("line-1"), config_l1);
 
 new Chart(document.getElementById("scatter-1"), config_s1);
 
+new Chart(document.getElementById("line-1-test"), config_l1_test);
+
+new Chart(document.getElementById("stackbar-1"), config_sb1);
+
+fillDount();
+
+fillTitleNameSPMT("summary-per-month-title", earliestMonth, lastestMonth);
+fillTitleNameSPMT("summary-per-month-title-bar", earliestMonth, lastestMonth);
 // detectEmptyLabel(config_l1, "g-l1");
 
 function detectEmptyLabel(config, target_div) {

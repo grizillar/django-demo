@@ -107,7 +107,18 @@ def LPTransform():
 
     lp_campaign = lp_campaign.fillna(value=0)
 
-    return lp_campaign
+    unique_group = lp_campaign.drop_duplicates(subset=["name"], keep='first')
+    unique_group.reset_index(inplace=True)
+
+    lp_campaign_group = lp_campaign.groupby(lp_campaign["name"]).sum()
+    lp_campaign_group.reset_index(inplace=True)
+    lp_campaign_group['cid'] = np.arange(lp_campaign_group.shape[0])
+    lp_campaign_group['date'] = unique_group['date']
+    lp_campaign_group['name'] = unique_group['name']
+    lp_campaign_group['pid'] = 3
+    lp_campaign_group['dateadded'] = unique_group['dateadded']
+
+    return lp_campaign_group
 
 
 def LMTransform():

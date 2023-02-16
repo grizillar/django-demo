@@ -2,9 +2,13 @@
 <link rel="stylesheet" href="/static/dashboard/dashboard.css" />
 {% endblock %} {% block javascript %}
 <script>
+	var campaignsJSON = "{{ campaigns }}";
 	var summaryJSON = "{{ summaryJSON }}";
 	var CPRJSON = "{{ CPRJSON }}";
 	var summaryPMJSON = "{{ summaryPMJSON }}";
+	var topCPOJSON = "{{ topCPOJSON }}";
+	var simpleCampaignJSON = "{{ simpleCampaignJSON }}";
+
 	var startdate = "{{ start_date }}";
 	var enddate = "{{ end_date }}";
 	var platform = "{{ platform }}";
@@ -190,14 +194,14 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-2 d-flex">
+		<!-- <div class="col-2 d-flex">
 			<div class="card w-100">
 				<div class="card-body">
 					<p>Empty card</p>
 				</div>
 			</div>
-		</div>
-		<div class="col-10">
+		</div> -->
+		<div class="col-12">
 			<div class="card">
 				<div class="card-body">
 					<table class="table cell">
@@ -233,6 +237,33 @@
 				<div class="card-body">
 					<div id="g-l1">
 						<canvas id="line-1"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-6">
+			<div class="card">
+				<div class="card-body">
+					<table class="table cell">
+						<thead class="table-dark">
+							<tr>
+								<th scope="col">Rank</th>
+								<th scope="col">Campaign</th>
+								<th scope="col" id="topCPO-th"></th>
+							</tr>
+						</thead>
+						<tbody id="db3"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-6">
+			<div class="card h-100">
+				<div class="card-body">
+					<div class="g-s1">
+						<canvas id="scatter-1"></canvas>
 					</div>
 				</div>
 			</div>

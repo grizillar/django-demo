@@ -6,7 +6,23 @@
 		<div class="card-body"></div>
 		<div class="alert alert-success sign" role="alert">
 			<h4 class="alert-heading">อัปโหลดข้อมูลสำเร็จ!</h4>
-			<p class="mb-0">จำนวนข้อมูลที่อัปโหลด: <b>{{campaignLength}}</b> แถว</p>
+			<div class="d-flex justify-content-between">
+				<div>จำนวนข้อมูลบนระบบเดิม:</div>
+				<div><b>{{ origin }}</b> แถว</div>
+			</div>
+			<div class="d-flex justify-content-between">
+				<div>จำนวนข้อมูลที่อัปโหลด:</div>
+				<div><b>{{ amount }}</b> แถว</div>
+			</div>
+			<div class="d-flex justify-content-between">
+				<div>จำนวนข้อมูลที่ถูกตัดออกไป:</div>
+				<div><b style="color: rgb(213, 56, 87)">-{{ bad_amount }}</b> แถว</div>
+			</div>
+			<hr />
+			<div class="d-flex justify-content-between">
+				<div>จำนวนข้อมูลบนระบบในปัจจุบัน:</div>
+				<div><b>{{ database_amount }}</b> แถว</div>
+			</div>
 		</div>
 	</div>
 </div>

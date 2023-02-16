@@ -1,15 +1,19 @@
 var summary = JSON.parse(summaryJSON.replace(/&quot;/g, '"'));
 var costPerResult = JSON.parse(CPRJSON.replace(/&quot;/g, '"'));
 var summaryPerMonth = JSON.parse(summaryPMJSON.replace(/&quot;/g, '"'));
+var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
+var simpleCampaign = JSON.parse(simpleCampaignJSON.replace(/&quot;/g, '"'));
 
 platform = platform.split(",");
 multiple_selector = multiple_selector.split(",");
 
 const platform_range = Object.keys(summary.pid).length;
 const objective_range = Object.keys(costPerResult.objective).length;
+const top_range = Object.keys(topCPO.cid).length;
 
 construct_table(summary, "db1", platform_range, "a");
 construct_table(costPerResult, "db2", objective_range, "b");
+construct_table(getTopCostPerResult(topCPO, single_selector), "db3", top_range, "c");
 
 function initParams() {
 	document.getElementById("startdate").value = startdate;
@@ -17,8 +21,18 @@ function initParams() {
 	fillCheckboxPlatform("platform-query", platform);
 	fillRadio("single-selector", single_selector);
 	fillCheckbox("multiple-selector", multiple_selector);
+
+	document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
 }
 initParams();
+
+function capitalizeFirstLetter(string) {
+	return string
+		.toLowerCase()
+		.split("_")
+		.map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+		.join(" ");
+}
 
 // function highlightCostPerResult(table_code) {
 // 	for (let i = 0; i < objective_range; i++) {
@@ -57,6 +71,34 @@ function fillRadio(groupName, target) {
 			radios[i].checked = true;
 		}
 	}
+}
+
+function getTopCostPerResult(cpo, target) {
+	pos_target = ["reach", "impression", "engagement"];
+	if (pos_target.includes(target)) {
+		target = "costper" + target;
+		return construct_ranking_object(cpo, ["name", target]);
+	}
+	return {};
+}
+
+function construct_ranking_object(json_obj, cols) {
+	var s_obj = {};
+
+	var top = Object.keys(json_obj[cols[0]]).length;
+
+	var rank_obj = {};
+	for (let i = 0; i < top; i++) {
+		rank_obj[i] = i + 1;
+	}
+
+	s_obj["rank"] = rank_obj;
+
+	for (let i = 0; i < cols.length; i++) {
+		s_obj[cols[i]] = json_obj[cols[i]];
+	}
+
+	return s_obj;
 }
 
 function construct_table(data_object, element_id, range, table_code) {

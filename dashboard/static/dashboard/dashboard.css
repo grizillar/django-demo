@@ -22,7 +22,8 @@
 	margin-right: 5px;
 }
 
-th {
+th,
+td {
 	text-align: center;
 	vertical-align: middle;
 }

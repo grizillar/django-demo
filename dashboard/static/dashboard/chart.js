@@ -1,3 +1,8 @@
+LIMIT = {
+	spending: 30000,
+	count: 400000,
+};
+
 function monthof(index) {
 	const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 	return monthNames[index - 1];
@@ -89,6 +94,40 @@ function formDatasetWithDate(data, labels) {
 	return datasets;
 }
 
+function formScatterData(data, target_x, target_y) {
+	var arr = [];
+	var x_arr = formArray(data[target_x]);
+	var y_arr = formArray(data[target_y]);
+	var name_arr = formArray(data["name"]);
+	for (let i = 0; i < x_arr.length; i++) {
+		//LIMIT
+		if (x_arr[i] < LIMIT.count && y_arr[i] < LIMIT.spending) {
+			let obj = {};
+			obj["x"] = x_arr[i];
+			obj["y"] = y_arr[i];
+			obj["name"] = name_arr[i];
+			if (x_arr[i] != 0) {
+				arr.push(obj);
+			}
+		}
+	}
+	return arr;
+}
+
+function formScatterDataset(data, target_list) {
+	var datasets = [];
+	for (let i = 0; i < target_list.length; i++) {
+		if (["reach", "impression", "engagement"].includes(target_list[i])) {
+			var obj = {
+				label: capitalizeFirstLetter(target_list[i]),
+				data: formScatterData(data, target_list[i], "spending"),
+			};
+			datasets.push(obj);
+		}
+	}
+	return datasets;
+}
+
 function capitalizeFirstLetter(string) {
 	return string
 		.toLowerCase()
@@ -134,6 +173,10 @@ const data_l1 = {
 	datasets: formDatasetWithDate(summaryPerMonth, multiple_selector),
 };
 
+const data_s1 = {
+	datasets: formScatterDataset(simpleCampaign, multiple_selector),
+};
+
 const config_l1 = {
 	type: "line",
 	data: data_l1,
@@ -165,12 +208,40 @@ const config_d1 = {
 	},
 };
 
+const config_s1 = {
+	type: "scatter",
+	data: data_s1,
+	options: {
+		scales: {
+			x: {
+				type: "linear",
+				position: "bottom",
+			},
+		},
+		plugins: {
+			tooltip: {
+				callbacks: {
+					label: function (context) {
+						return `${context.raw.name}`;
+					},
+				},
+			},
+			title: {
+				display: true,
+				text: `Cost Effective Scatterplot`,
+			},
+		},
+	},
+};
+
 // Always before draw Chart
 detectEmptyLabel(config_l1, "g-l1");
 
 new Chart(document.getElementById("donut-1"), config_d1);
 
 new Chart(document.getElementById("line-1"), config_l1);
+
+new Chart(document.getElementById("scatter-1"), config_s1);
 
 // detectEmptyLabel(config_l1, "g-l1");
 

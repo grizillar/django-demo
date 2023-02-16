@@ -90,6 +90,9 @@ def getAllCampaign():
     """
     campaign = pd.read_sql_query(query, con=engine)
 
+    campaign.replace(to_replace=[r'\\t|\\n|\\r|\\"', '\t|\n|\r|\"'], value=[
+                     " ", " "], regex=True, inplace=True)
+
     return campaign
 
 
@@ -201,6 +204,54 @@ def getSitetrafficLength():
         FROM dbo.SiteTraffic
     """
     return int(pd.read_sql_query(query, con=engine).iloc[0])
+
+
+def getTopCostPerCampaign(startdate=None, enddate=None, platform=None, top=5, order="reach"):
+    startdate, enddate, platform = normalizeQueryParams(
+        startdate, enddate, platform)
+
+    platform = listToSQLString([p for p in platform if "1" == p or "2" == p])
+
+    if (order in ["reach", "impression", "engagement"]):
+        order = "costper" + order
+    else:
+        order = "costperreach"
+
+    query = f"""
+        SELECT TOP({top}) c.cid, c.name,
+	        ROUND(c.spending/c.reach, 3) as costperreach,
+	        ROUND(c.spending/c.impression, 3) as costperimpression,
+	        ROUND(c.spending/c.engagement, 3) as costperengagement
+        FROM dbo.Campaign as c
+        WHERE c.pid IN {platform} AND c.date BETWEEN '{startdate}' AND '{enddate}'
+        ORDER BY {order} ASC
+    """
+
+    topCPO = pd.read_sql_query(query, con=engine)
+
+    topCPO.replace(to_replace=[r'\\t|\\n|\\r|\\"', '\t|\n|\r|\"'], value=[
+        " ", " "], regex=True, inplace=True)
+
+    return topCPO
+
+
+def getSimpleCampaign(startdate=None, enddate=None, platform=None):
+    startdate, enddate, platform = normalizeQueryParams(
+        startdate, enddate, platform)
+
+    platform = listToSQLString(platform)
+
+    query = f"""
+        SELECT c.cid, c.name, c.spending, c.reach, c.impression, c.engagement
+        FROM Campaign as c
+        WHERE c.pid IN {platform} AND c.date BETWEEN '{startdate}' AND '{enddate}'
+    """
+    simpleCampaign = pd.read_sql_query(query, con=engine)
+
+    simpleCampaign.replace(to_replace=[r'\\t|\\n|\\r|\\"', '\t|\n|\r|\"'], value=[
+        " ", " "], regex=True, inplace=True)
+
+    return simpleCampaign
 
 
 def writeCSV(file):

@@ -41,6 +41,9 @@ def dashboard(request):
     summary = handler.getAllSummary(sdate, edate, platform)
     costPerResult = handler.getCostPerResult(sdate, edate, platform)
     summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
+    topCPO = handler.getTopCostPerCampaign(
+        sdate, edate, platform, order=single_selector)
+    simpleCampaign = handler.getSimpleCampaign(sdate, edate, platform)
 
     context = {
         "start_date": sdate,
@@ -50,7 +53,9 @@ def dashboard(request):
         "multiple_selector": context_multiple_selector,
         "summaryJSON": summary.to_json(),
         "CPRJSON": costPerResult.to_json(),
-        "summaryPMJSON": summaryPerMonth.to_json()
+        "summaryPMJSON": summaryPerMonth.to_json(),
+        "topCPOJSON": topCPO.to_json(),
+        "simpleCampaignJSON": simpleCampaign.to_json(),
 
     }
 
@@ -88,10 +93,16 @@ def upload(request):
                     handler.applyDate(data, date)
 
                 if type == "GS":
+                    origin = handler.getSiteTrafficLength()
+                    filetype = "sitetraffic"
                     handler.insertSiteTraffic(data)
+
                 else:
+                    origin = handler.getCampaignLength()
+                    filetype = "campaign"
                     handler.insertCampaign(data)
-                return HttpResponseRedirect('/upload-success')
+
+                return HttpResponseRedirect(f'/upload-success?type={filetype}&origin={origin}&amount={rowLength}')
             else:
                 print("unmatch")
 
@@ -104,14 +115,21 @@ def upload(request):
 
 def uploadsuccess(request):
     type = request.GET.get("type")
-    amount = request.GET.get("amount")
-    campaignLenght = handler.getCampaignLength()
-    siteTrafficLenght = handler.getSiteTrafficLength()
+    origin = int(request.GET.get("origin"))
+    amount = int(request.GET.get("amount"))
+    database_amount = 0
+    print(type)
+    if type == "campaign":
+        database_amount = handler.getCampaignLength()
+    if type == "sitetraffic":
+        database_amount = handler.getSiteTrafficLength()
+    bad_amount = amount - (database_amount - origin)
+
     context = {
-        'campaignLength': campaignLenght,
-        'siteTrafficLenght': siteTrafficLenght,
-        'type': type,
-        'amount': amount
+        'amount': amount,
+        'origin': origin,
+        'database_amount': database_amount,
+        'bad_amount': bad_amount
     }
     return render(request, 'upload/upload-success.html', context)
 

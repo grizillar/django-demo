@@ -6,17 +6,16 @@
 	var summaryJSON = "{{ summaryJSON }}";
 	var CPRJSON = "{{ CPRJSON }}";
 	var summaryPMJSON = "{{ summaryPMJSON }}";
-	var topCPRSTR = "{{ topCPRSTR }}";
-	var simpleCampaignJSON = "{{ simpleCampaignJSON }}";
 	var platformCountJSON = "{{ platformCountJSON }}";
-	var topCampaignJSON = "{{ topCampaignJSON }}";
 
+	var possibleYearJSON = "{{ possibleYearJSON }}";
 	var startdate = "{{ start_date }}";
 	var enddate = "{{ end_date }}";
 	var platform = "{{ platform }}";
 	var multiple_selector = "{{ multiple_selector }}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script src="/static/dashboard/dashboard.js"></script>
 <script src="/static/dashboard/chart.js"></script>
 {% endblock %} {% block content %}
@@ -30,11 +29,34 @@
 				<form id="query-form" onsubmit="querySubmit()">
 					<div class="row">
 						<div class="col">
-							<p style="font-size: large"><strong>ช่วงเวลา</strong></p>
-							<label for="startdate">วันที่ต้น</label>
-							<input id="startdate" name="startdate" class="form-control query-date-input" type="date" />
-							<label for="enddate">วันที่ปลาย</label>
-							<input id="enddate" name="enddate" class="form-control query-date-input" type="date" />
+							<ul class="nav nav-tabs" id="time-interval" role="tablist">
+								<li class="nav-item" role="presentation">
+									<button class="nav-link active" id="date-tab" data-bs-toggle="tab" data-bs-target="#date" type="button" role="tab" aria-controls="date" aria-selected="true">ตามวันที่</button>
+								</li>
+								<li class="nav-item" role="presentation">
+									<button class="nav-link" id="period-tab" data-bs-toggle="tab" data-bs-target="#period" type="button" role="tab" aria-controls="period" aria-selected="false">ตามพีเรียด</button>
+								</li>
+							</ul>
+							<div class="tab-content" id="time-interval-contents">
+								<div class="tab-pane fade show active" id="date" role="tabpanel" aria-labelledby="date-tab">
+									<p style="font-size: large"><strong>ช่วงเวลา</strong></p>
+									<label for="startdate">วันที่ต้น</label>
+									<input id="startdate" name="startdate" class="form-control query-date-input" type="date" />
+									<label for="enddate">วันที่ปลาย</label>
+									<input id="enddate" name="enddate" class="form-control query-date-input" type="date" />
+								</div>
+								<div class="tab-pane fade" id="period" role="tabpanel" aria-labelledby="period-tab">
+									<p style="font-size: large"><strong>ช่วงพีเรียด</strong></p>
+									<div id="period-array">
+										<!-- Period Element Fill up here -->
+									</div>
+									<div id="count-control" class="d-inline-flex justify-content-end align-items-center w-100">
+										<button type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="periodDec()">-</button>
+										<p class="counter" id="period-counter">1</p>
+										<button type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="periodInc()">+</button>
+									</div>
+								</div>
+							</div>
 						</div>
 						<div class="col">
 							<p style="font-size: large"><strong>แพลตฟอร์ม</strong></p>
@@ -105,6 +127,7 @@
 						</div>
 					</div>
 					<div class="row">
+						<div id="E6" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E6):</b> ไม่พบข้อมูลปีในช่วงพีเรียด</div>
 						<div class="d-flex justify-content-end query-submit-buttons">
 							<!-- <button type="button" onclick="testbutton()" class="btn override">ทดสอบ</button> -->
 							<button type="button" onclick="queryClear()" class="btn btn-danger override">ล้าง</button>
@@ -213,22 +236,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-3 d-flex">
-				<div class="card">
-					<div class="card-body">
-						<p class="graph-title">แผนภาพเปรียบเทียบผลรวม<br />ข้อมูลของแต่ละแพลตฟอร์ม</p>
-						<!-- <div class="d-flex justify-content-center align-items-center">
-						<p><b>จำนวนผู้ใช้งาน</b></p>
-					</div> -->
 
-						<div class="d-flex justify-content-center align-items-center">
-							<canvas id="donut-1"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 		<div class="row" id="chart-test-1"></div>
 		<div class="row">
 			<div class="col-12">
@@ -238,30 +246,6 @@
 						<div id="g-l1">
 							<canvas id="line-1"></canvas>
 						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="row test hidden">
-			<div class="col-12">
-				<div class="card">
-					<div class="card-body">
-						<p class="graph-title" id="summary-per-month-title-bar">กราฟผลรวมข้อมูลแต่ละเดือน</p>
-						<div id="g-l1">
-							<canvas id="line-1-test"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-12">
-			<div class="card">
-				<div class="card-body">
-					<p class="graph-title" id="summary-per-month-title-bar">แคมเปญที่มีผลรวม Reach, Impression, Campaign สูงที่สุด 5 อันดับ</p>
-					<div id="g-l1">
-						<canvas id="stackbar-1"></canvas>
 					</div>
 				</div>
 			</div>
@@ -304,21 +288,6 @@
 							</thead>
 							<tbody id="db2"></tbody>
 						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="row gx-0" id="top-rank-CPR"></div>
-
-		<div class="row hidden">
-			<div class="col-12">
-				<div class="card h-100">
-					<div class="card-body">
-						<p class="graph-title">แผนภาพการกระจายของแต่ละข้อมูลและค่าใช้จ่าย</p>
-						<div class="g-s1">
-							<canvas id="scatter-1"></canvas>
-						</div>
 					</div>
 				</div>
 			</div>

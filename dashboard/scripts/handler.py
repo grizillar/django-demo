@@ -32,6 +32,8 @@ DRIVER = 'ODBC Driver 17 for SQL Server'
 engine = sa.create_engine(
     f'mssql+pyodbc://{USER}:{PASSWORD}@{HOST}/{DATABASE}?driver={DRIVER}')
 
+# Utils functions
+
 
 def applyDate(df, date):
     if "date" in df.columns:
@@ -82,6 +84,53 @@ def normalizeQueryParams(startdate=None, enddate=None, platform=None):
     return (startdate, enddate, platform)
 
 
+def writeCSV(file):
+    TEMPPATH = './dashboard/tmp/temp.csv'
+    try:
+        with open(TEMPPATH, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+
+        df = pd.read_csv(TEMPPATH)
+        return df.shape
+    except FileNotFoundError:
+        print(os.listdir())
+
+
+def insertCampaign(df):
+    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+HOST +
+                          ';DATABASE='+DATABASE+';UID='+USER+';PWD=' + PASSWORD)
+    cursor = cnxn.cursor()
+
+    df['cid'] = df['cid'] + getCampaignLength()
+    df.rename(columns={'name': 'cname'}, inplace=True)
+
+    for index, row in df.iterrows():
+        cursor.execute("INSERT INTO dbo.Campaign (date, cid, name, pid, spending, reach, impression, engagement, objective, video_view, landing_page_view, product_view, add_to_cart, purchase, dateadded) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                       row.date, row.cid, row.cname, row.pid, row.spending, row.reach, row.impression, row.engagement, row.objective, row.video_view, row.landing_page_view, row.product_view, row.add_to_cart, row.purchase, row.dateadded)
+
+    cnxn.commit()
+    cursor.close()
+
+
+def insertSiteTraffic(df):
+    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+HOST +
+                          ';DATABASE='+DATABASE+';UID='+USER+';PWD=' + PASSWORD)
+    cursor = cnxn.cursor()
+
+    df['sid'] = df['sid'] + getSitetrafficLength()
+    df.rename(columns={'name': 'cname'}, inplace=True)
+
+    for index, row in df.iterrows():
+        cursor.execute("INSERT INTO dbo.SiteTraffic (sid, pid, uri, all_user, new_user, order_count, revenue, dateadded) values (?,?,?,?,?,?,?,?)",
+                       row.sid, row.pid, row.uri, row.all_user, row.new_user, row.order_count, row.revenue, row.dateadded)
+
+    cnxn.commit()
+    cursor.close()
+
+# General queries
+
+
 def getAllCampaign():
 
     query = f"""
@@ -110,6 +159,29 @@ def getSiteTrafficLength():
         FROM dbo.SiteTraffic
     """
     return int(pd.read_sql_query(query, con=engine).iloc[0])
+
+
+def getPossibleYear():
+    query = f"""
+        SELECT DISTINCT year
+        FROM Campaign
+        UNION
+        SELECT DISTINCT year
+        FROM SiteTraffic
+    """
+    years = pd.read_sql_query(query, con=engine)
+
+    return years
+
+
+def getSitetrafficLength():
+    query = f"""
+        SELECT COUNT(sid)
+        FROM dbo.SiteTraffic
+    """
+    return int(pd.read_sql_query(query, con=engine).iloc[0])
+
+# By date queries
 
 
 def getPlatformCount(startdate=None, enddate=None, platform=None):
@@ -175,7 +247,7 @@ def getAllSummary(startdate=None, enddate=None, platform=None):
 
     return summary
 
-# Note: excluding NAN (large data too)
+    # Note: excluding NAN (large data too)
 
 
 def getCostPerResult(startdate=None, enddate=None, platform=None):
@@ -230,14 +302,6 @@ def getSummaryPerMonth(startdate=None, enddate=None, platform=None):
     summaryPerMonth = pd.read_sql_query(query, con=engine)
 
     return summaryPerMonth
-
-
-def getSitetrafficLength():
-    query = f"""
-        SELECT COUNT(sid)
-        FROM dbo.SiteTraffic
-    """
-    return int(pd.read_sql_query(query, con=engine).iloc[0])
 
 
 def getTopCostPerCampaign(startdate=None, enddate=None, platform=None, top=5, order="reach"):
@@ -312,48 +376,3 @@ def getSimpleCampaign(startdate=None, enddate=None, platform=None):
         " ", " "], regex=True, inplace=True)
 
     return simpleCampaign
-
-
-def writeCSV(file):
-    TEMPPATH = './dashboard/tmp/temp.csv'
-    try:
-        with open(TEMPPATH, 'wb+') as destination:
-            for chunk in file.chunks():
-                destination.write(chunk)
-
-        df = pd.read_csv(TEMPPATH)
-        return df.shape
-    except FileNotFoundError:
-        print(os.listdir())
-
-
-def insertCampaign(df):
-    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+HOST +
-                          ';DATABASE='+DATABASE+';UID='+USER+';PWD=' + PASSWORD)
-    cursor = cnxn.cursor()
-
-    df['cid'] = df['cid'] + getCampaignLength()
-    df.rename(columns={'name': 'cname'}, inplace=True)
-
-    for index, row in df.iterrows():
-        cursor.execute("INSERT INTO dbo.Campaign (date, cid, name, pid, spending, reach, impression, engagement, objective, video_view, landing_page_view, product_view, add_to_cart, purchase, dateadded) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                       row.date, row.cid, row.cname, row.pid, row.spending, row.reach, row.impression, row.engagement, row.objective, row.video_view, row.landing_page_view, row.product_view, row.add_to_cart, row.purchase, row.dateadded)
-
-    cnxn.commit()
-    cursor.close()
-
-
-def insertSiteTraffic(df):
-    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+HOST +
-                          ';DATABASE='+DATABASE+';UID='+USER+';PWD=' + PASSWORD)
-    cursor = cnxn.cursor()
-
-    df['sid'] = df['sid'] + getSitetrafficLength()
-    df.rename(columns={'name': 'cname'}, inplace=True)
-
-    for index, row in df.iterrows():
-        cursor.execute("INSERT INTO dbo.SiteTraffic (sid, pid, uri, all_user, new_user, order_count, revenue, dateadded) values (?,?,?,?,?,?,?,?)",
-                       row.sid, row.pid, row.uri, row.all_user, row.new_user, row.order_count, row.revenue, row.dateadded)
-
-    cnxn.commit()
-    cursor.close()

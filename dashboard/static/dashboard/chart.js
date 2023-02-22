@@ -187,13 +187,28 @@ function filteredPlatformColor() {
 }
 
 function fillDount() {
+	function filteredNullandZero(arr, arr_platform_name) {
+		for (let i = 0; i < arr.length; i++) {
+			if (arr[i] == 0 || arr[i] == null) {
+				arr.splice(i);
+				arr_platform_name.splice(i);
+			}
+		}
+		return {
+			data: arr,
+			platform: arr_platform_name,
+		};
+	}
+
 	for (let i = 0; i < multiple_selector.length; i++) {
+		var filtered_data = filteredNullandZero(formArray(summary[multiple_selector[i]]), formArray(summary.platform_name));
+		console.log(filtered_data.data);
 		var data_d = {
-			labels: formArray(summary.platform_name),
+			labels: filtered_data.platform,
 			datasets: [
 				{
 					label: multiple_selector[i],
-					data: formArray(summary[multiple_selector[i]]),
+					data: filtered_data.data,
 					backgroundColor: filteredPlatformColor,
 					hoverOffset: 4,
 				},
@@ -203,14 +218,27 @@ function fillDount() {
 			type: "doughnut",
 			data: data_d,
 			options: {
+				tooltips: {
+					enabled: false,
+				},
 				respondsive: true,
 				plugins: {
 					title: {
 						display: false,
 						text: `${capitalizeFirstLetter("reach")} Count`,
 					},
+					datalabels: {
+						formatter: (value, ctx) => {
+							const datapoints = ctx.chart.data.datasets[0].data;
+							const total = datapoints.reduce((total, datapoint) => total + datapoint, 0);
+							const percentage = (value / total) * 100;
+							return percentage.toFixed(2) + "%";
+						},
+						color: "#000000",
+					},
 				},
 			},
+			plugins: [ChartDataLabels],
 		};
 		new Chart(document.getElementById(`rd-${i}`), config_d);
 	}
@@ -226,27 +254,27 @@ const data_l1 = {
 	datasets: formDatasetWithDate(summaryPerMonth, multiple_selector),
 };
 
-const data_s1 = {
-	datasets: formScatterDataset(simpleCampaign, multiple_selector),
-};
+// const data_s1 = {
+// 	datasets: formScatterDataset(simpleCampaign, multiple_selector),
+// };
 
-const data_sb1 = {
-	labels: formArray(topCampaign.name),
-	datasets: [
-		{
-			label: "Reach",
-			data: formArray(topCampaign.reach),
-		},
-		{
-			label: "Impression",
-			data: formArray(topCampaign.impression),
-		},
-		{
-			label: "Engagement",
-			data: formArray(topCampaign.engagement),
-		},
-	],
-};
+// const data_sb1 = {
+// 	labels: formArray(topCampaign.name),
+// 	datasets: [
+// 		{
+// 			label: "Reach",
+// 			data: formArray(topCampaign.reach),
+// 		},
+// 		{
+// 			label: "Impression",
+// 			data: formArray(topCampaign.impression),
+// 		},
+// 		{
+// 			label: "Engagement",
+// 			data: formArray(topCampaign.engagement),
+// 		},
+// 	],
+// };
 
 const config_l1 = {
 	type: "line",
@@ -296,75 +324,73 @@ const config_d1 = {
 	},
 };
 
-const config_s1 = {
-	type: "scatter",
-	data: data_s1,
-	options: {
-		animation: {
-			duration: 0,
-		},
-		scales: {
-			x: {
-				type: "linear",
-				position: "bottom",
-			},
-		},
-		plugins: {
-			tooltip: {
-				callbacks: {
-					label: function (context) {
-						return `${context.raw.name}`;
-					},
-				},
-			},
-			title: {
-				display: false,
-				text: `Cost Effective Scatterplot`,
-			},
-		},
-	},
-};
+// const config_s1 = {
+// 	type: "scatter",
+// 	data: data_s1,
+// 	options: {
+// 		animation: {
+// 			duration: 0,
+// 		},
+// 		scales: {
+// 			x: {
+// 				type: "linear",
+// 				position: "bottom",
+// 			},
+// 		},
+// 		plugins: {
+// 			tooltip: {
+// 				callbacks: {
+// 					label: function (context) {
+// 						return `${context.raw.name}`;
+// 					},
+// 				},
+// 			},
+// 			title: {
+// 				display: false,
+// 				text: `Cost Effective Scatterplot`,
+// 			},
+// 		},
+// 	},
+// };
 
-const config_sb1 = {
-	type: "bar",
-	data: data_sb1,
-	options: {
-		plugins: {
-			title: {
-				display: false,
-				text: "",
-			},
-		},
-		responsive: true,
-		scales: {
-			x: {
-				stacked: true,
-			},
-			y: {
-				stacked: true,
-			},
-		},
-		indexAxis: "y",
-	},
-};
+// const config_sb1 = {
+// 	type: "bar",
+// 	data: data_sb1,
+// 	options: {
+// 		plugins: {
+// 			title: {
+// 				display: false,
+// 				text: "",
+// 			},
+// 		},
+// 		responsive: true,
+// 		scales: {
+// 			x: {
+// 				stacked: true,
+// 			},
+// 			y: {
+// 				stacked: true,
+// 			},
+// 		},
+// 		indexAxis: "y",
+// 		elements: {
+// 			bar: {
+// 				borderWidth: 2,
+// 			},
+// 		},
+// 		categoryPercentage: 0.5,
+// 		barPercentage: 0.8,
+// 	},
+// };
 
 // Always before draw Chart
 detectEmptyLabel(config_l1, "g-l1");
 
-new Chart(document.getElementById("donut-1"), config_d1);
-
 new Chart(document.getElementById("line-1"), config_l1);
-
-new Chart(document.getElementById("scatter-1"), config_s1);
-
-new Chart(document.getElementById("line-1-test"), config_l1_test);
-
-new Chart(document.getElementById("stackbar-1"), config_sb1);
 
 fillDount();
 
 fillTitleNameSPMT("summary-per-month-title", earliestMonth, lastestMonth);
-fillTitleNameSPMT("summary-per-month-title-bar", earliestMonth, lastestMonth);
 // detectEmptyLabel(config_l1, "g-l1");
 
 function detectEmptyLabel(config, target_div) {

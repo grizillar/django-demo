@@ -1,21 +1,18 @@
 var summary = jsonParseQuot(summaryJSON);
 var costPerResult = jsonParseQuot(CPRJSON);
 var summaryPerMonth = jsonParseQuot(summaryPMJSON);
-// var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
-var simpleCampaign = jsonParseQuot(simpleCampaignJSON);
 var platformCount = jsonParseQuot(platformCountJSON);
-var topCampaign = jsonParseQuot(topCampaignJSON);
+var possibleYear = jsonParseQuot(possibleYearJSON);
 
-console.log(topCampaign);
+// var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
+// var simpleCampaign = jsonParseQuot(simpleCampaignJSON);
 
-console.log(platformCount);
+// var topCampaign = jsonParseQuot(topCampaignJSON);
 
-var topCPRarray = [];
-if (topCPRSTR) {
-	topCPRarray = jsonParseQuotArray(topCPRSTR.split("|"));
-}
-
-console.log(topCPRarray);
+// var topCPRarray = [];
+// if (topCPRSTR) {
+// 	topCPRarray = jsonParseQuotArray(topCPRSTR.split("|"));
+// }
 
 platform = platform.split(",");
 multiple_selector = multiple_selector.split(",");
@@ -23,7 +20,24 @@ multiple_selector = multiple_selector.split(",");
 const platform_range = Object.keys(summary.pid).length;
 const platform_count_range = Object.keys(platformCount.pid).length;
 const objective_range = Object.keys(costPerResult.objective).length;
-const top_range = Object.keys(topCPRarray[0].cid).length;
+// const top_range = Object.keys(topCPRarray[0].cid).length;
+
+var periodArray = [1];
+var currently_interval = "date-tab";
+
+const E6 = document.getElementById("E6");
+
+// Events
+const intervalTabs = document.querySelector(".nav-tabs");
+intervalTabs.addEventListener("click", (event) => {
+	event.preventDefault();
+	if (event.target.classList.contains("nav-link")) {
+		// Get the ID of the active tab
+		const activeTab = intervalTabs.querySelector(".active").getAttribute("id");
+		currently_interval = activeTab;
+		console.log(currently_interval);
+	}
+});
 
 construct_table(summary, "db1", platform_range, "a");
 construct_table(costPerResult, "db2", objective_range, "b");
@@ -33,13 +47,30 @@ function initParams() {
 	document.getElementById("enddate").value = enddate;
 	fillCheckboxPlatform("platform-query", platform);
 	fillCheckbox("multiple-selector", multiple_selector);
+	fillPeriodInput("period-array", periodArray);
 
 	fillCount();
-	fillTopRankTable("top-rank-CPR");
+	fillRatioDonut("chart-test-1");
 
 	// document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
 }
 initParams();
+
+// init functions
+
+function fillPeriodInput(target_id, periodArray) {
+	const target = document.getElementById(target_id);
+	periodArray.forEach((i) => {
+		addPeriodInput("period-array", i);
+	});
+}
+
+function fillSelect(target_id, arr) {
+	var target = document.getElementById(target_id);
+	for (let i = 0; i < arr.length; i++) {
+		target.innerHTML += `<option value="${arr[i]}">${arr[i]}</option>`;
+	}
+}
 
 function fillCount() {
 	var c_fb = 0;
@@ -65,36 +96,6 @@ function fillCount() {
 	document.getElementById("ln_count").innerHTML = c_ln;
 	document.getElementById("gg_count").innerHTML = c_gg;
 }
-
-function jsonParseQuot(jsonForm) {
-	return JSON.parse(jsonForm.replace(/&quot;/g, '"'));
-}
-
-function jsonParseQuotArray(array) {
-	arr = [];
-	for (let i = 0; i < array.length; i++) {
-		arr.push(jsonParseQuot(array[i]));
-	}
-	return arr;
-}
-
-function capitalizeFirstLetter(string) {
-	return string
-		.toLowerCase()
-		.split("_")
-		.map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-		.join(" ");
-}
-
-// function highlightCostPerResult(table_code) {
-// 	for (let i = 0; i < objective_range; i++) {
-// 		var objective = costPerResult.objective[i];
-// 		if (objective == "reach") {
-// 			document.getElementById(`${table_code}-${i}-2`).classList.add("cell-highlight");
-// 			document.getElementById(`${table_code}-${i}-3`).classList.add("cell-highlight");
-// 		}
-// 	}
-// }
 
 function fillCheckboxPlatform(groupName, arr) {
 	var checkedBoxes = document.querySelectorAll(`input[name=${groupName}]`);
@@ -125,6 +126,85 @@ function fillRadio(groupName, target) {
 	}
 }
 
+// Util functions
+
+function formArray(data) {
+	let arr = [];
+	try {
+		for (const [key, value] of Object.entries(data)) {
+			arr.push(value);
+		}
+	} catch (error) {
+		console.error(error);
+	}
+
+	return arr;
+}
+
+function throwError(Error, mode) {
+	if (mode) {
+		Error.classList.remove("hidden");
+	} else {
+		Error.classList.add("hidden");
+	}
+}
+
+function jsonParseQuot(jsonForm) {
+	return JSON.parse(jsonForm.replace(/&quot;/g, '"'));
+}
+
+function jsonParseQuotArray(array) {
+	arr = [];
+	for (let i = 0; i < array.length; i++) {
+		arr.push(jsonParseQuot(array[i]));
+	}
+	return arr;
+}
+
+function capitalizeFirstLetter(string) {
+	return string
+		.toLowerCase()
+		.split("_")
+		.map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+		.join(" ");
+}
+
+function createWarning(msg, target_div) {
+	var target = document.getElementById(target_div);
+	warning = `<div class="alert alert-warning alert-dismissible fade show" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>คำเตือน:</b> ${msg}  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+	target.innerHTML += warning;
+}
+
+function arrayToQueryString(arr) {
+	var query_str = "(";
+	for (let i = 0; i < arr.length; i++) {
+		query_str = query_str + "'" + arr[i] + "'";
+		if (i != arr.length - 1) {
+			query_str = query_str + ",";
+		}
+	}
+	query_str = query_str + ")";
+	return query_str;
+}
+
+function removeElementsByClass(className) {
+	const elements = document.getElementsByClassName(className);
+	while (elements.length > 0) {
+		elements[0].parentNode.removeChild(elements[0]);
+	}
+}
+
+function getAllInputValue(arr, format) {
+	let res = [];
+	arr.forEach((i) => {
+		var target = format + i;
+		res.push(document.getElementById(target).value);
+	});
+	return res;
+}
+
+// Constructing functions
+
 function fillRatioDonut(target) {
 	target_div = document.getElementById(target);
 	for (let i = 0; i < multiple_selector.length; i++) {
@@ -142,8 +222,6 @@ function fillRatioDonut(target) {
 		`;
 	}
 }
-
-fillRatioDonut("chart-test-1");
 
 function fillTopRankTable(target) {
 	target_div = document.getElementById(target);
@@ -240,26 +318,55 @@ function getListCheckedBox(groupName) {
 	return arr;
 }
 
-function testbutton() {
-	console.log(getListCheckedBox("platform-query").toString());
+function addPeriodInput(target_id, i) {
+	const target = document.getElementById(target_id);
+	var inputFormat = `<div class="period-input-${i}">
+			<div class="d-flex justify-content-between">
+			<label for="period-${i}">พีเรียดที่ ${i}: </label>
+			<div class="d-inline-flex">
+				<select class="form-select" aria-label="period" id="period-filter-${i}">
+					<option selected>-</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+				</select>
+				<select class="form-select" aria-label="year" id="year-filter-${i}" onchange="throwError(E6, false)";>
+					<option selected>-</option>
+				</select>
+			</div>
+			</div>
+		</div>`;
+	target.insertAdjacentHTML("beforeend", inputFormat);
+	fillSelect(`year-filter-${i}`, formArray(possibleYear["year"]));
 }
 
-function arrayToQueryString(arr) {
-	var query_str = "(";
-	for (let i = 0; i < arr.length; i++) {
-		query_str = query_str + "'" + arr[i] + "'";
-		if (i != arr.length - 1) {
-			query_str = query_str + ",";
-		}
+// Trigger functions
+
+function periodInc() {
+	const i = periodArray.length + 1;
+	periodArray.push(i);
+	addPeriodInput("period-array", i);
+	document.getElementById("period-counter").innerHTML = i;
+}
+
+function periodDec() {
+	const i = periodArray.length - 1;
+	if (i > 0) {
+		periodArray.splice(i);
+		removeElementsByClass(`period-input-${i + 1}`);
+		document.getElementById("period-counter").innerHTML = i;
+		throwError(E6, false);
 	}
-	query_str = query_str + ")";
-	return query_str;
-}
-
-function createWarning(msg, target_div) {
-	var target = document.getElementById(target_div);
-	warning = `<div class="alert alert-warning alert-dismissible fade show" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>คำเตือน:</b> ${msg}  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
-	target.innerHTML += warning;
 }
 
 function queryClear() {
@@ -267,23 +374,47 @@ function queryClear() {
 }
 
 function querySubmit() {
-	startdate = document.getElementById("startdate").value;
-	enddate = document.getElementById("enddate").value;
-	platform = getListCheckedBox("platform-query").toString();
+	var startdate = document.getElementById("startdate").value;
+	var enddate = document.getElementById("enddate").value;
+	var periods = getAllInputValue(periodArray, "period-filter-");
+	var years = getAllInputValue(periodArray, "year-filter-");
+
+	var platform = getListCheckedBox("platform-query").toString();
 	if (document.querySelector('input[name="single-selector"]:checked') == null) {
 		single_selector = "";
 	} else {
 		single_selector = document.querySelector('input[name="single-selector"]:checked').id;
 	}
-	multiple_selector = getListCheckedBox("multiple-selector").toString();
+	var multiple_selector = getListCheckedBox("multiple-selector").toString();
+
+	if (currently_interval == "date-tab") {
+	}
+	if (currently_interval == "period-tab") {
+	}
 
 	let ref = "/?";
-	if (startdate != "") {
-		ref = ref + `&startdate=${startdate}`;
+
+	if (currently_interval == "date-tab") {
+		ref = ref + `&by=date`;
+		if (startdate != "") {
+			ref = ref + `&startdate=${startdate}`;
+		}
+		if (enddate != "") {
+			ref = ref + `&enddate=${enddate}`;
+		}
 	}
-	if (enddate != "") {
-		ref = ref + `&enddate=${enddate}`;
+	if (currently_interval == "period-tab") {
+		if (years.includes("-")) {
+			throwError(E6, true);
+			return;
+		}
+		ref = ref + `&by=period`;
+		periods = periods.toString().replace(/-/g, "");
+		years = years.toString();
+		ref = ref + `&periods=${periods}`;
+		ref = ref + `&years=${years}`;
 	}
+
 	if (platform != "") {
 		ref = ref + `&platform=${platform}`;
 	}

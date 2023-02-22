@@ -17,8 +17,7 @@ MULTIPLE_SELECTOR_DEFAULT = "reach,impression,engagement"
 def dashboard(request):
     # http://localhost:8000/query/startdate=2023-1-1&enddate=2023-1-3
 
-    sdate = request.GET.get("startdate")
-    edate = request.GET.get("enddate")
+    by = request.GET.get("by")
     platform = request.GET.get("platform")
     multiple_selector = request.GET.get("ms")
 
@@ -35,22 +34,50 @@ def dashboard(request):
         multiple_selector = MULTIPLE_SELECTOR_DEFAULT.split(",")
         context_multiple_selector = MULTIPLE_SELECTOR_DEFAULT
 
-    summary = handler.getAllSummary(sdate, edate, platform)
-    costPerResult = handler.getCostPerResult(sdate, edate, platform)
-    summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
-
-    topCPRarray = []
-    for s in multiple_selector:
-        if s in ["reach", "impression", "engagement"]:
-            topCPRarray.append(handler.getTopCostPerCampaign(
-                sdate, edate, platform, order=s).to_json())
-    topCPRarray = '|'.join(a for a in topCPRarray)
-
-    simpleCampaign = handler.getSimpleCampaign(sdate, edate, platform)
-    platformCount = handler.getPlatformCount(sdate, edate, platform)
-    campaignCount = handler.getCampaignCount(sdate, edate, platform)
+    possibleYear = handler.getPossibleYear()
     siteTrafficCount = handler.getSiteTrafficLength()
-    topCampaign = handler.getTopCampaign(sdate, edate, platform)
+
+    if by == None:
+        by = "date"
+
+    if by == "date":
+        sdate = request.GET.get("startdate")
+        edate = request.GET.get("enddate")
+
+        summary = handler.getAllSummary(sdate, edate, platform)
+        costPerResult = handler.getCostPerResult(sdate, edate, platform)
+        summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
+
+        # topCPRarray = []
+        # for s in multiple_selector:
+        #     if s in ["reach", "impression", "engagement"]:
+        #         topCPRarray.append(handler.getTopCostPerCampaign(
+        #             sdate, edate, platform, order=s).to_json())
+        # topCPRarray = '|'.join(a for a in topCPRarray)
+
+        # simpleCampaign = handler.getSimpleCampaign(sdate, edate, platform)
+        platformCount = handler.getPlatformCount(sdate, edate, platform)
+        campaignCount = handler.getCampaignCount(sdate, edate, platform)
+
+        # topCampaign = handler.getTopCampaign(sdate, edate, platform)
+
+    if by == "period":
+        sdate = request.GET.get("startdate")
+        edate = request.GET.get("enddate")
+
+        periods = request.GET.get("periods")
+        years = request.GET.get("years")
+
+        summary = handler.getAllSummary(sdate, edate, platform)
+        costPerResult = handler.getCostPerResult(sdate, edate, platform)
+        summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
+        platformCount = handler.getPlatformCount(sdate, edate, platform)
+        campaignCount = handler.getCampaignCount(sdate, edate, platform)
+
+        periods = periods.split(",")
+        print(periods)
+        years = years.split(",")
+        print(years)
 
     context = {
         "start_date": sdate,
@@ -60,12 +87,10 @@ def dashboard(request):
         "summaryJSON": summary.to_json(),
         "CPRJSON": costPerResult.to_json(),
         "summaryPMJSON": summaryPerMonth.to_json(),
-        "topCPRSTR": topCPRarray,
-        "simpleCampaignJSON": simpleCampaign.to_json(),
         "platformCountJSON": platformCount.to_json(),
         "campaign_count": campaignCount,
         "sitetraffic_count": siteTrafficCount,
-        "topCampaignJSON": topCampaign.to_json(),
+        "possibleYearJSON": possibleYear.to_json(),
 
     }
 

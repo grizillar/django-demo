@@ -48,6 +48,58 @@ td {
 	margin-left: 5px;
 }
 
+.nav-link {
+	color: black;
+}
+
+.nav :hover {
+	color: var(--primary-color);
+}
+
+.tab-content {
+	margin: 5px;
+}
+
+.form-select {
+	width: auto;
+}
+
+.sign {
+	margin-left: 15px;
+	margin-right: 15px;
+	flex-shrink: 1;
+}
+
+#count-control {
+	margin-top: 10px;
+}
+
+.counter {
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 0px;
+	align-items: center;
+}
+
+.count-btn {
+	font-size: 21px;
+	color: black;
+	background-color: transparent;
+	border-color: transparent;
+}
+
+.count-btn:hover {
+	color: var(--primary-color);
+	background-color: transparent;
+	border-color: transparent;
+}
+
+.count-btn:active {
+	color: var(--primary-color) !important;
+	background-color: transparent !important;
+	border-color: transparent !important;
+}
+
 .section {
 	margin-top: 20px;
 	padding: 10px;
@@ -74,19 +126,19 @@ td {
 }
 
 .facebook_color {
-	background-color: #92c0ee;
+	color: #4267b2;
 }
 
 .instagram_color {
-	background-color: #dce8b6;
+	color: #d62976;
 }
 
 .line_color {
-	background-color: #addcb1;
+	color: #06c755;
 }
 
 .google_color {
-	background-color: #eb8888;
+	color: #db4437;
 }
 
 .icon {

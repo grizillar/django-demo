@@ -20,6 +20,7 @@ def dashboard(request):
     by = request.GET.get("by")
     platform = request.GET.get("platform")
     multiple_selector = request.GET.get("ms")
+    page, sdate, edate, context_period, context_year = '', '', '', '', ''
 
     if platform is not None:
         platform = platform.split(",")
@@ -58,6 +59,7 @@ def dashboard(request):
         # simpleCampaign = handler.getSimpleCampaign(sdate, edate, platform)
         platformCount = handler.getPlatformCount(sdate, edate, platform)
         campaignCount = handler.getCampaignCount(sdate, edate, platform)
+        siteTrafficCount = handler.getSiteTrafficLength()
 
         # topCampaign = handler.getTopCampaign(sdate, edate, platform)
 
@@ -65,21 +67,39 @@ def dashboard(request):
         sdate = request.GET.get("startdate")
         edate = request.GET.get("enddate")
 
-        periods = request.GET.get("periods")
-        years = request.GET.get("years")
+        context_period = request.GET.get("periods")
+        context_year = request.GET.get("years")
+        page = int(request.GET.get("p"))
+        periods = context_period.split(",")
+        years = context_year.split(",")
 
-        summary = handler.getAllSummary(sdate, edate, platform)
-        costPerResult = handler.getCostPerResult(sdate, edate, platform)
+        summary = handler.getAllSummaryByPeriod(
+            periods[page-1], years[page-1], platform)
+        platformCount = handler.getPlatformCountByPeriod(
+            periods[page-1], years[page-1], platform)
+        campaignCount = handler.getCampaignCountByPeriod(
+            periods[page-1], years[page-1], platform)
+        siteTrafficCount = handler.getSitetrafficLengthByPeriod(
+            periods[page-1], years[page-1], platform
+        )
+        costPerResult = handler.getCostPerResultByPeriod(
+            periods[page-1], years[page-1], platform)
+
+        arraySummary = handler.formQueryArray(
+            handler.getAllSummaryByPeriod, periods, years, platform
+        )
+        # Remove later
         summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
-        platformCount = handler.getPlatformCount(sdate, edate, platform)
-        campaignCount = handler.getCampaignCount(sdate, edate, platform)
 
-        periods = periods.split(",")
-        print(periods)
-        years = years.split(",")
-        print(years)
+        arraySummaryByPeriod = handler.formQueryArray(
+            handler.getSummaryByPeriod, periods, years, platform
+        )
 
     context = {
+        "by": by,
+        "page": page,
+        "period": context_period,
+        "year": context_year,
         "start_date": sdate,
         "end_date": edate,
         "platform": context_platform,
@@ -91,8 +111,11 @@ def dashboard(request):
         "campaign_count": campaignCount,
         "sitetraffic_count": siteTrafficCount,
         "possibleYearJSON": possibleYear.to_json(),
-
     }
+
+    if by == "period":
+        context["summaryARR"] = arraySummary
+        context["summaryByPeriodARR"] = arraySummaryByPeriod
 
     return render(request, 'dashboard/dashboard.html', context)
 

@@ -1,7 +1,4 @@
-LIMIT = {
-	spending: 30000,
-	count: 400000,
-};
+const PERIODINYEAR = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 var earliestMonth;
 var lastestMonth;
@@ -53,6 +50,14 @@ function interpretDate(range) {
 	return dateArr;
 }
 
+function interpretPeriod(range) {
+	var periodArr = [];
+	for (let i = 0; i < range.length; i++) {
+		periodArr.push(`พีเรียด ${range[i]}`);
+	}
+	return periodArr;
+}
+
 function fillDataByDate(sumdata, data, range) {
 	const monthArr = formArray(sumdata.month);
 	const yearArr = formArray(sumdata.year);
@@ -74,6 +79,24 @@ function fillDataByDate(sumdata, data, range) {
 		}
 	}
 
+	return filledArr;
+}
+
+function fillDataByPeriod(sumdata, data) {
+	const dataArr = formArray(data);
+	console.log(formArray(sumdata.period));
+
+	console.log(dataArr);
+	var filledArr = [];
+	let currPeriod = 1;
+	for (let i = 0; i < 13; i++) {
+		if (formArray(sumdata.period).includes(PERIODINYEAR[i])) {
+			filledArr.push(dataArr[currPeriod - 1]);
+			currPeriod++;
+		} else {
+			filledArr.push(0);
+		}
+	}
 	return filledArr;
 }
 
@@ -103,6 +126,20 @@ function formDatasetWithDate(data, target_list) {
 		var label = {
 			label: capitalizeFirstLetter(labels[i]),
 			data: fillDataByDate(data, data[labels[i]], formDateRange()),
+		};
+		datasets.push(label);
+	}
+	return datasets;
+}
+
+// Can choose only one
+function formDatasetWithPeriod() {
+	var labels = removeDuplicate(year);
+	var datasets = [];
+	for (let i = 0; i < labels.length; i++) {
+		var label = {
+			label: labels[i],
+			data: fillDataByPeriod(summaryByPeriodArray[i], summaryByPeriodArray[i].engagement),
 		};
 		datasets.push(label);
 	}
@@ -186,23 +223,50 @@ function filteredPlatformColor() {
 	return color;
 }
 
+function filteredPlatformColorByPlatformName(platform_name) {
+	var color = [];
+	if (platform_name.includes("Facebook")) {
+		color.push("rgb(66,103,178)");
+	}
+	if (platform_name.includes("Instagram")) {
+		color.push("rgb(255, 51, 153)");
+	}
+	if (platform_name.includes("Line")) {
+		color.push("rgb(102, 255, 102)");
+	}
+	if (platform_name.includes("Google Ads")) {
+		color.push("rgb(255, 80, 80)");
+	}
+	if (platform_name.includes("Google Organic")) {
+		color.push("rgb(255, 255, 102)");
+	}
+	if (platform_name.includes("Website")) {
+		color.push("rgb(204, 0, 153)");
+	}
+	if (platform_name.includes("Other")) {
+		color.push("rgb(204, 204, 204)");
+	}
+	return color;
+}
+
 function fillDount() {
 	function filteredNullandZero(arr, arr_platform_name) {
+		var new_arr = [];
+		var new_platform = [];
 		for (let i = 0; i < arr.length; i++) {
-			if (arr[i] == 0 || arr[i] == null) {
-				arr.splice(i);
-				arr_platform_name.splice(i);
+			if (arr[i] != 0 && arr[i] != null) {
+				new_arr.push(arr[i]);
+				new_platform.push(arr_platform_name[i]);
 			}
 		}
 		return {
-			data: arr,
-			platform: arr_platform_name,
+			data: new_arr,
+			platform: new_platform,
 		};
 	}
 
 	for (let i = 0; i < multiple_selector.length; i++) {
 		var filtered_data = filteredNullandZero(formArray(summary[multiple_selector[i]]), formArray(summary.platform_name));
-		console.log(filtered_data.data);
 		var data_d = {
 			labels: filtered_data.platform,
 			datasets: [
@@ -214,20 +278,66 @@ function fillDount() {
 				},
 			],
 		};
+
+		if (by == "period") {
+			var data_arr = [];
+			var filtered_platform = [];
+			for (let j = 0; j < summaryArray.length; j++) {
+				var filtered_data_frag = filteredNullandZero(formArray(summaryArray[j][multiple_selector[i]]), formArray(summaryArray[j].platform_name));
+				var data_format = {
+					label: multiple_selector[i],
+					data: formArray(summaryArray[j][multiple_selector[i]]),
+					backgroundColor: ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"],
+					hoverOffset: 4,
+				};
+				filtered_platform = arrayUnion(filtered_platform, filtered_data_frag.platform);
+				console.log(data_format.backgroundColor);
+
+				data_arr.push(data_format);
+			}
+			data_d.labels = formArray(summaryArray[0].platform_name);
+			data_d.datasets = data_arr;
+		}
+
 		var config_d = {
 			type: "doughnut",
 			data: data_d,
 			options: {
-				tooltips: {
-					enabled: false,
-				},
 				respondsive: true,
 				plugins: {
+					tooltip: {
+						callbacks: {
+							title: (context) => {
+								var index = context[0].datasetIndex;
+								if (by == "date") {
+									return context.title;
+								}
+								if (period[index] == "") {
+									return `ปี ${year[index]}`;
+								}
+								return `พีเรียด ${period[index]}, ปี ${year[index]}`;
+							},
+							label: (context) => {
+								let label = context.label;
+								let value = parseInt(context.parsed);
+
+								if (!label) label = "Unknown";
+
+								let dataArr = context.chart.data.datasets[context.datasetIndex].data;
+
+								const total = dataArr.reduce((total, dataArr) => total + dataArr, 0);
+								const percentage = Math.round((value / total) * 100);
+
+								return label + ": " + percentage + "%";
+							},
+						},
+					},
 					title: {
 						display: false,
 						text: `${capitalizeFirstLetter("reach")} Count`,
 					},
 					datalabels: {
+						display: false,
 						formatter: (value, ctx) => {
 							const datapoints = ctx.chart.data.datasets[0].data;
 							const total = datapoints.reduce((total, datapoint) => total + datapoint, 0);
@@ -247,11 +357,6 @@ function fillDount() {
 const data_d1 = {
 	labels: formArray(summary.platform_name),
 	datasets: formRatioDonutDatasets(multiple_selector),
-};
-
-const data_l1 = {
-	labels: interpretDate(formDateRange()),
-	datasets: formDatasetWithDate(summaryPerMonth, multiple_selector),
 };
 
 // const data_s1 = {
@@ -275,40 +380,6 @@ const data_l1 = {
 // 		},
 // 	],
 // };
-
-const config_l1 = {
-	type: "line",
-	data: data_l1,
-	options: {
-		responsive: true,
-		plugins: {
-			legend: {
-				position: "top",
-			},
-			title: {
-				display: false,
-				text: "Summation per Month",
-			},
-		},
-	},
-};
-
-const config_l1_test = {
-	type: "bar",
-	data: data_l1,
-	options: {
-		responsive: true,
-		plugins: {
-			legend: {
-				position: "top",
-			},
-			title: {
-				display: false,
-				text: "Summation per Month",
-			},
-		},
-	},
-};
 
 const config_d1 = {
 	type: "doughnut",
@@ -384,13 +455,63 @@ const config_d1 = {
 // };
 
 // Always before draw Chart
-detectEmptyLabel(config_l1, "g-l1");
-
-new Chart(document.getElementById("line-1"), config_l1);
+// detectEmptyLabel(config_l1, "g-l1");
 
 fillDount();
 
-fillTitleNameSPMT("summary-per-month-title", earliestMonth, lastestMonth);
+if (by == "date") {
+	const data_l1_d = {
+		labels: interpretDate(formDateRange()),
+		datasets: formDatasetWithDate(summaryPerMonth, multiple_selector),
+	};
+
+	const config_l1_d = {
+		type: "line",
+		data: data_l1_d,
+		options: {
+			responsive: true,
+			plugins: {
+				legend: {
+					position: "top",
+				},
+				title: {
+					display: false,
+					text: "Summation per Month",
+				},
+			},
+		},
+	};
+
+	fillTitleNameSPMT("summary-per-month-title", earliestMonth, lastestMonth);
+	new Chart(document.getElementById("line-1"), config_l1_d);
+}
+
+if (by == "period") {
+	const data_l1_p = {
+		labels: interpretPeriod(PERIODINYEAR),
+		datasets: formDatasetWithPeriod(),
+	};
+
+	const config_l1_p = {
+		type: "line",
+		data: data_l1_p,
+		options: {
+			responsive: true,
+			plugins: {
+				legend: {
+					position: "top",
+				},
+				title: {
+					display: false,
+					text: "Summation per Month",
+				},
+			},
+		},
+	};
+
+	new Chart(document.getElementById("line-1"), config_l1_p);
+}
+
 // detectEmptyLabel(config_l1, "g-l1");
 
 function detectEmptyLabel(config, target_div) {

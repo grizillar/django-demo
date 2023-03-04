@@ -4,6 +4,18 @@ var summaryPerMonth = jsonParseQuot(summaryPMJSON);
 var platformCount = jsonParseQuot(platformCountJSON);
 var possibleYear = jsonParseQuot(possibleYearJSON);
 
+var summaryArray = "";
+if (summaryARR) {
+	summaryArray = jsonParseQuotArray(summaryARR.split("|"));
+}
+
+var summaryByPeriodArray = "";
+if (summaryByPeriodARR) {
+	summaryByPeriodArray = jsonParseQuotArray(summaryByPeriodARR.split("|"));
+}
+
+console.log(summaryByPeriodArray);
+
 // var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
 // var simpleCampaign = jsonParseQuot(simpleCampaignJSON);
 
@@ -16,7 +28,12 @@ var possibleYear = jsonParseQuot(possibleYearJSON);
 
 platform = platform.split(",");
 multiple_selector = multiple_selector.split(",");
+period = period.split(",");
+year = year.split(",");
 
+page = parseInt(page);
+
+const page_range = year.length;
 const platform_range = Object.keys(summary.pid).length;
 const platform_count_range = Object.keys(platformCount.pid).length;
 const objective_range = Object.keys(costPerResult.objective).length;
@@ -26,6 +43,7 @@ var periodArray = [1];
 var currently_interval = "date-tab";
 
 const E6 = document.getElementById("E6");
+const E7 = document.getElementById("E7");
 
 // Events
 const intervalTabs = document.querySelector(".nav-tabs");
@@ -47,10 +65,19 @@ function initParams() {
 	document.getElementById("enddate").value = enddate;
 	fillCheckboxPlatform("platform-query", platform);
 	fillCheckbox("multiple-selector", multiple_selector);
-	fillPeriodInput("period-array", periodArray);
+
+	adjustByTab();
+	adjustPeriodArray();
+
+	fillPeriodInput(periodArray);
+	pageSet();
 
 	fillCount();
 	fillRatioDonut("chart-test-1");
+
+	demoFunction1();
+
+	adjustPageName();
 
 	// document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
 }
@@ -58,10 +85,65 @@ initParams();
 
 // init functions
 
-function fillPeriodInput(target_id, periodArray) {
-	const target = document.getElementById(target_id);
+function demoFunction1() {
+	if (by == "date") {
+		document.getElementById("summary-per-month-title").innerHTML = "กราฟผลรวม Reach, Impression, Engagementแต่ละเดือน";
+	}
+	if (by == "period") {
+		document.getElementById("summary-per-month-title").innerHTML = "กราฟผลรวม Engagment แต่ละพีเรียด";
+	}
+}
+
+function adjustPeriodArray() {
+	if (page_range > 1) {
+		for (let i = 2; i <= page_range; i++) {
+			periodArray.push(i);
+		}
+	}
+	document.getElementById("period-counter").innerHTML = periodArray.length;
+}
+
+function adjustByTab() {
+	if (by == "period") {
+		currently_interval = "period-tab";
+		document.getElementById("date-tab").classList.remove("active");
+		document.getElementById("date-pane").classList.remove("active");
+		document.getElementById("period-tab").classList.add("active");
+		document.getElementById("period-pane").classList.add("active", "show");
+	}
+}
+
+function pageSet() {
+	if (by != "period") {
+		document.getElementById("page-selection").classList.add("hidden");
+	}
+	// Page boundery
+	if (page == 1) {
+		document.getElementById("page-dec").classList.add("invisibility");
+	}
+	if (page == page_range) {
+		document.getElementById("page-inc").classList.add("invisibility");
+	}
+}
+
+function adjustPageName() {
+	page_name = document.getElementById("page-name");
+	if (period[page - 1] != "") {
+		page_name.innerHTML = `หน้าที่ - ${page}: ข้อมูลพีเรียดที่ ${period[page - 1]} ปี ${year[page - 1]}`;
+	} else {
+		page_name.innerHTML = `หน้าที่ - ${page}: ปี ${year[page - 1]}`;
+	}
+}
+
+function fillPeriodInput(periodArray) {
 	periodArray.forEach((i) => {
 		addPeriodInput("period-array", i);
+		if (period[i - 1] != "") {
+			document.getElementById(`period-filter-${i}`).value = period[i - 1];
+		}
+		if (year[i - 1] != "") {
+			document.getElementById(`year-filter-${i}`).value = year[i - 1];
+		}
 	});
 }
 
@@ -128,6 +210,34 @@ function fillRadio(groupName, target) {
 
 // Util functions
 
+function arrayUnion(a, b) {
+	return [...new Set([...a, ...b])];
+}
+
+function removeDuplicate(arr) {
+	return [...new Set([...arr])];
+}
+
+function areObjectsEqual(obj1, obj2) {
+	const props1 = Object.entries(obj1);
+	const props2 = Object.entries(obj2);
+
+	if (props1.length !== props2.length) {
+		return false;
+	}
+
+	for (let i = 0; i < props1.length; i++) {
+		const [key1, value1] = props1[i];
+		const [key2, value2] = props2[i];
+
+		if (key1 !== key2 || value1 !== value2) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 function formArray(data) {
 	let arr = [];
 	try {
@@ -154,6 +264,10 @@ function jsonParseQuot(jsonForm) {
 }
 
 function jsonParseQuotArray(array) {
+	if (array == null) {
+		return [];
+	}
+	array = removeDuplicate(array);
 	arr = [];
 	for (let i = 0; i < array.length; i++) {
 		arr.push(jsonParseQuot(array[i]));
@@ -359,6 +473,14 @@ function periodInc() {
 	document.getElementById("period-counter").innerHTML = i;
 }
 
+function pageInc() {
+	querySubmit(page + 1);
+}
+
+function pageDec() {
+	querySubmit(page - 1);
+}
+
 function periodDec() {
 	const i = periodArray.length - 1;
 	if (i > 0) {
@@ -373,7 +495,7 @@ function queryClear() {
 	window.location.href = `/`;
 }
 
-function querySubmit() {
+function querySubmit(page = 1) {
 	var startdate = document.getElementById("startdate").value;
 	var enddate = document.getElementById("enddate").value;
 	var periods = getAllInputValue(periodArray, "period-filter-");
@@ -386,11 +508,6 @@ function querySubmit() {
 		single_selector = document.querySelector('input[name="single-selector"]:checked').id;
 	}
 	var multiple_selector = getListCheckedBox("multiple-selector").toString();
-
-	if (currently_interval == "date-tab") {
-	}
-	if (currently_interval == "period-tab") {
-	}
 
 	let ref = "/?";
 
@@ -408,7 +525,18 @@ function querySubmit() {
 			throwError(E6, true);
 			return;
 		}
+		if (
+			periods.includes("-") &&
+			periods.filter((x) => {
+				return x == "-";
+			}).length != periodArray.length
+		) {
+			throwError(E7, true);
+			return;
+		}
+
 		ref = ref + `&by=period`;
+		ref = ref + `&p=${page}`;
 		periods = periods.toString().replace(/-/g, "");
 		years = years.toString();
 		ref = ref + `&periods=${periods}`;

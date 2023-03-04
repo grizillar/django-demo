@@ -122,7 +122,11 @@ td {
 }
 
 .hidden {
-	display: none;
+	display: none !important;
+}
+
+.invisibility {
+	visibility: hidden !important;
 }
 
 .facebook_color {

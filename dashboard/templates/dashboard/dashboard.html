@@ -8,11 +8,18 @@
 	var summaryPMJSON = "{{ summaryPMJSON }}";
 	var platformCountJSON = "{{ platformCountJSON }}";
 
+	var summaryARR = "{{ summaryARR }}";
+	var summaryByPeriodARR = "{{ summaryByPeriodARR }}";
+
+	var by = "{{ by }}";
 	var possibleYearJSON = "{{ possibleYearJSON }}";
 	var startdate = "{{ start_date }}";
 	var enddate = "{{ end_date }}";
 	var platform = "{{ platform }}";
 	var multiple_selector = "{{ multiple_selector }}";
+	var page = "{{ page }}";
+	var period = "{{ period }}";
+	var year = "{{ year }}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -31,21 +38,21 @@
 						<div class="col">
 							<ul class="nav nav-tabs" id="time-interval" role="tablist">
 								<li class="nav-item" role="presentation">
-									<button class="nav-link active" id="date-tab" data-bs-toggle="tab" data-bs-target="#date" type="button" role="tab" aria-controls="date" aria-selected="true">ตามวันที่</button>
+									<button class="nav-link active" id="date-tab" data-bs-toggle="tab" data-bs-target="#date-pane" type="button" role="tab" aria-controls="date" aria-selected="true">ตามวันที่</button>
 								</li>
 								<li class="nav-item" role="presentation">
-									<button class="nav-link" id="period-tab" data-bs-toggle="tab" data-bs-target="#period" type="button" role="tab" aria-controls="period" aria-selected="false">ตามพีเรียด</button>
+									<button class="nav-link" id="period-tab" data-bs-toggle="tab" data-bs-target="#period-pane" type="button" role="tab" aria-controls="period" aria-selected="false">ตามพีเรียด</button>
 								</li>
 							</ul>
 							<div class="tab-content" id="time-interval-contents">
-								<div class="tab-pane fade show active" id="date" role="tabpanel" aria-labelledby="date-tab">
+								<div class="tab-pane fade show active" id="date-pane" role="tabpanel" aria-labelledby="date-tab">
 									<p style="font-size: large"><strong>ช่วงเวลา</strong></p>
 									<label for="startdate">วันที่ต้น</label>
 									<input id="startdate" name="startdate" class="form-control query-date-input" type="date" />
 									<label for="enddate">วันที่ปลาย</label>
 									<input id="enddate" name="enddate" class="form-control query-date-input" type="date" />
 								</div>
-								<div class="tab-pane fade" id="period" role="tabpanel" aria-labelledby="period-tab">
+								<div class="tab-pane fade" id="period-pane" role="tabpanel" aria-labelledby="period-tab">
 									<p style="font-size: large"><strong>ช่วงพีเรียด</strong></p>
 									<div id="period-array">
 										<!-- Period Element Fill up here -->
@@ -128,6 +135,7 @@
 					</div>
 					<div class="row">
 						<div id="E6" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E6):</b> ไม่พบข้อมูลปีในช่วงพีเรียด</div>
+						<div id="E7" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E6):</b> ช่วงของพีเรียดไม่เท่ากัน</div>
 						<div class="d-flex justify-content-end query-submit-buttons">
 							<!-- <button type="button" onclick="testbutton()" class="btn override">ทดสอบ</button> -->
 							<button type="button" onclick="queryClear()" class="btn btn-danger override">ล้าง</button>
@@ -140,6 +148,11 @@
 		</div>
 	</div>
 	<div class="shadow section">
+		<div id="page-selection" class="d-inline-flex justify-content-between align-items-center w-100">
+			<button id="page-dec" type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="pageDec()"><i class="bi bi-arrow-left-circle-fill"></i></button>
+			<p class="counter" id="page-name"></p>
+			<button id="page-inc" type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="pageInc()"><i class="bi bi-arrow-right-circle-fill"></i></button>
+		</div>
 		<div class="row gx-3">
 			<div class="col-9">
 				<div class="card">
@@ -282,7 +295,7 @@
 									<th scope="col">Cost/<br />VideoView</th>
 									<th scope="col">Cost/<br />LandingPage</th>
 									<th scope="col">Cost/<br />ProductView</th>
-									<th scope="col">Cost/<br />AddtoCartw</th>
+									<th scope="col">Cost/<br />AddtoCart</th>
 									<th scope="col">Cost/<br />Purchase</th>
 								</tr>
 							</thead>

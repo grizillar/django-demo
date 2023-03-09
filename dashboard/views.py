@@ -64,37 +64,81 @@ def dashboard(request):
         # topCampaign = handler.getTopCampaign(sdate, edate, platform)
 
     if by == "period":
+
         sdate = request.GET.get("startdate")
         edate = request.GET.get("enddate")
 
-        context_period = request.GET.get("periods")
-        context_year = request.GET.get("years")
-        page = int(request.GET.get("p"))
-        periods = context_period.split(",")
-        years = context_year.split(",")
+        compare_toggle = request.GET.get("compare").capitalize() == "True"
 
-        summary = handler.getAllSummaryByPeriod(
-            periods[page-1], years[page-1], platform)
-        platformCount = handler.getPlatformCountByPeriod(
-            periods[page-1], years[page-1], platform)
-        campaignCount = handler.getCampaignCountByPeriod(
-            periods[page-1], years[page-1], platform)
-        siteTrafficCount = handler.getSitetrafficLengthByPeriod(
-            periods[page-1], years[page-1], platform
-        )
-        costPerResult = handler.getCostPerResultByPeriod(
-            periods[page-1], years[page-1], platform)
+        periods_1 = request.GET.get("periods_1").split(",")
+        years_1 = request.GET.get("years_1").split(",")
 
-        arraySummary = handler.formQueryArray(
-            handler.getAllSummaryByPeriod, periods, years, platform
+        periodrange_1 = handler.formPeriodRange(periods_1, years_1)
+
+        summary = handler.queryByPeriodinRange(
+            handler.getAllSummaryByPeriod, periodrange_1[0], periodrange_1[1], platform
         )
-        # Remove later
+
+        platformCount = handler.queryByPeriodinRange(
+            handler.getPlatformCountByPeriod, periodrange_1[0], periodrange_1[1], platform
+        )
+
+        # campaignCount = handler.getCampaignCountByPeriod(
+        #     periods[page-1], years[page-1], platform)
+        campaignCount = handler.intByPeriodinRange(
+            handler.getCampaignCountByPeriod, periodrange_1[0], periodrange_1[1], platform
+        )
+        # siteTrafficCount = handler.getSitetrafficLengthByPeriod(
+        #     periods[page-1], years[page-1], platform
+        # )
+        siteTrafficCount = handler.intByPeriodinRange(
+            handler.getSitetrafficLengthByPeriod, periodrange_1[0], periodrange_1[1], platform
+        )
+        costPerResult = handler.queryByPeriodinRange(
+            handler.getCostPerResultByPeriod, periodrange_1[0], periodrange_1[1], platform
+        )
+
+        # arraySummary = handler.formQueryArray(
+        #     handler.getAllSummaryByPeriod, periods, years, platform
+        # )
+        # # Remove later
         summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
 
         arraySummaryByPeriod = handler.formQueryArray(
-            handler.getSummaryByPeriod, periods, years, platform
+            handler.getSummaryByPeriod, periodrange_1[0], periodrange_1[1], platform
         )
 
+        if compare_toggle:
+            periods_2 = request.GET.get("periods_2").split(",")
+            years_2 = request.GET.get("years_2").split(",")
+            periodrange_2 = handler.formPeriodRange(periods_2, years_2)
+
+            summary_2 = handler.queryByPeriodinRange(
+                handler.getAllSummaryByPeriod, periodrange_2[0], periodrange_2[1], platform
+            )
+
+            platformCount_2 = handler.queryByPeriodinRange(
+                handler.getPlatformCountByPeriod, periodrange_2[0], periodrange_2[1], platform
+            )
+
+            campaignCount_2 = handler.intByPeriodinRange(
+                handler.getCampaignCountByPeriod, periodrange_2[0], periodrange_2[1], platform
+            )
+
+            siteTrafficCount_2 = handler.intByPeriodinRange(
+                handler.getSitetrafficLengthByPeriod, periodrange_2[0], periodrange_2[1], platform
+            )
+            costPerResult_2 = handler.queryByPeriodinRange(
+                handler.getCostPerResultByPeriod, periodrange_2[0], periodrange_2[1], platform
+            )
+
+            arraySummaryByPeriod_2 = handler.formQueryArray(
+                handler.getSummaryByPeriod, periodrange_2[0], periodrange_2[1], platform
+            )
+
+            summaryCompare = handler.percentageChange(summary, summary_2)
+            CPRCompare = handler.percentageChange(
+                costPerResult, costPerResult_2)
     context = {
         "by": by,
         "page": page,
@@ -114,9 +158,22 @@ def dashboard(request):
     }
 
     if by == "period":
-        context["summaryARR"] = arraySummary
+        # context["summaryARR"] = arraySummary
+        context["compare"] = compare_toggle
         context["summaryByPeriodARR"] = arraySummaryByPeriod
-
+        context["periods_1"] = ','.join(periods_1)
+        context["years_1"] = ','.join(years_1)
+        if compare_toggle:
+            context["periods_2"] = ','.join(periods_2)
+            context["years_2"] = ','.join(years_2)
+            context["summary_2JSON"] = summary_2.to_json()
+            context["platformCount_2JSON"] = platformCount_2.to_json()
+            context["campaign_count_2"] = campaignCount_2
+            context["sitetraffic_count_2"] = siteTrafficCount_2
+            context["CPR_2JSON"] = costPerResult_2.to_json()
+            context["arraySummaryByPeriod_2"] = arraySummaryByPeriod_2
+            context["summaryCompareJSON"] = summaryCompare.to_json()
+            context["CPRCompareJSON"] = CPRCompare.to_json()
     return render(request, 'dashboard/dashboard.html', context)
 
 
@@ -131,8 +188,6 @@ def upload(request):
             fileShape = handler.writeCSV(request.FILES['csvfile'])
             colLength = fileShape[1]
             rowLength = fileShape[0]
-
-            print(colLength, rowLength)
 
             if handler.colCheck(colLength, type):
                 if type == "FB":
@@ -176,7 +231,7 @@ def uploadsuccess(request):
     origin = int(request.GET.get("origin"))
     amount = int(request.GET.get("amount"))
     database_amount = 0
-    print(type)
+
     if type == "campaign":
         database_amount = handler.getCampaignLength()
     if type == "sitetraffic":

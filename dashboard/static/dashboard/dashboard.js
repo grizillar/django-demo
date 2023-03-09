@@ -4,6 +4,14 @@ var summaryPerMonth = jsonParseQuot(summaryPMJSON);
 var platformCount = jsonParseQuot(platformCountJSON);
 var possibleYear = jsonParseQuot(possibleYearJSON);
 
+if (compare) {
+	var summary_2 = jsonParseQuot(summary_2JSON);
+	var platformCount_2 = jsonParseQuot(platformCount_2JSON);
+	var summaryCompare = jsonParseQuot(summaryCompareJSON);
+	var costPerResult_2 = jsonParseQuot(CPR_2JSON);
+	var CPRCompare = jsonParseQuot(CPRCompareJSON);
+}
+
 var summaryArray = "";
 if (summaryARR) {
 	summaryArray = jsonParseQuotArray(summaryARR.split("|"));
@@ -13,8 +21,6 @@ var summaryByPeriodArray = "";
 if (summaryByPeriodARR) {
 	summaryByPeriodArray = jsonParseQuotArray(summaryByPeriodARR.split("|"));
 }
-
-console.log(summaryByPeriodArray);
 
 // var topCPO = JSON.parse(topCPOJSON.replace(/&quot;/g, '"'));
 // var simpleCampaign = jsonParseQuot(simpleCampaignJSON);
@@ -30,8 +36,10 @@ platform = platform.split(",");
 multiple_selector = multiple_selector.split(",");
 period = period.split(",");
 year = year.split(",");
-
-page = parseInt(page);
+if (compare) {
+	period_2 = period_2.split(",");
+	year_2 = year_2.split(",");
+}
 
 const page_range = year.length;
 const platform_range = Object.keys(summary.pid).length;
@@ -57,8 +65,16 @@ intervalTabs.addEventListener("click", (event) => {
 	}
 });
 
-construct_table(summary, "db1", platform_range, "a");
-construct_table(costPerResult, "db2", objective_range, "b");
+construct_table(summary, "summary", platform_range, "a");
+construct_table(costPerResult, "costperresult", objective_range, "b");
+if (compare) {
+	construct_table(summary_2, "summary-2", platform_range, "c");
+	construct_table(summaryCompare, "summary-compare-table", platform_range, "d");
+	colorPercentage("d", 7, 10);
+	construct_table(costPerResult_2, "costperresult-2", objective_range, "e");
+	construct_table(CPRCompare, "costperresult-compare", objective_range, "f");
+	colorPercentage("f", 7, 10);
+}
 
 function initParams() {
 	document.getElementById("startdate").value = startdate;
@@ -69,15 +85,16 @@ function initParams() {
 	adjustByTab();
 	adjustPeriodArray();
 
-	fillPeriodInput(periodArray);
-	pageSet();
-
+	// fillPeriodInput(periodArray);
+	fillPeriodInput();
+	fillTitle();
 	fillCount();
+
 	fillRatioDonut("chart-test-1");
 
-	demoFunction1();
+	showData2();
 
-	adjustPageName();
+	demoFunction1();
 
 	// document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
 }
@@ -95,12 +112,10 @@ function demoFunction1() {
 }
 
 function adjustPeriodArray() {
-	if (page_range > 1) {
-		for (let i = 2; i <= page_range; i++) {
-			periodArray.push(i);
-		}
-	}
-	document.getElementById("period-counter").innerHTML = periodArray.length;
+	fillSelect(`year-filter-1-start`, formArray(possibleYear["year"]));
+	fillSelect(`year-filter-1-end`, formArray(possibleYear["year"]));
+	fillSelect(`year-filter-2-start`, formArray(possibleYear["year"]));
+	fillSelect(`year-filter-2-end`, formArray(possibleYear["year"]));
 }
 
 function adjustByTab() {
@@ -113,19 +128,6 @@ function adjustByTab() {
 	}
 }
 
-function pageSet() {
-	if (by != "period") {
-		document.getElementById("page-selection").classList.add("hidden");
-	}
-	// Page boundery
-	if (page == 1) {
-		document.getElementById("page-dec").classList.add("invisibility");
-	}
-	if (page == page_range) {
-		document.getElementById("page-inc").classList.add("invisibility");
-	}
-}
-
 function adjustPageName() {
 	page_name = document.getElementById("page-name");
 	if (period[page - 1] != "") {
@@ -135,16 +137,68 @@ function adjustPageName() {
 	}
 }
 
-function fillPeriodInput(periodArray) {
-	periodArray.forEach((i) => {
-		addPeriodInput("period-array", i);
-		if (period[i - 1] != "") {
-			document.getElementById(`period-filter-${i}`).value = period[i - 1];
+function fillTitle() {
+	if (by == "period") {
+		var time_text = "";
+		var range_text = "";
+		var isYearSame = year[0] == year[1];
+		var isPeriodSame = period[0] == period[1];
+		if (isYearSame) {
+			if (isPeriodSame) {
+				time_text = `พีเรียดที่ ${period[0]}, ปี ${year[0]}`;
+				range_text = `${period[0]}, ${year[0]}`;
+			} else {
+				time_text = `ตั้งแต่พีเรียดที่ ${period[0]} ถึงพีเรียดที่ ${period[1]}, ปี ${year[0]}`;
+				range_text = `${period[0]} - ${period[1]}, ${year[0]}`;
+			}
+		} else {
+			time_text = `ตั้งแต่พีเรียดที่ ${period[0]}, ปี ${year[0]} ถึงพีเรียดที่ ${period[1]}, ปี ${year[1]}`;
+			range_text = `${period[0]}, ${year[0]} - ${period[1]}, ${year[1]}`;
 		}
-		if (year[i - 1] != "") {
-			document.getElementById(`year-filter-${i}`).value = year[i - 1];
+
+		document.getElementById("summary-1-title").innerHTML += ` ${time_text}`;
+		document.getElementById("cost-per-result-1-title").innerHTML += ` ${time_text}`;
+		if (compare) {
+			var time_text_2 = "";
+			var range_text_2 = "";
+			var isYearSame_2 = year_2[0] == year_2[1];
+			var isPeriodSame_2 = period_2[0] == period_2[1];
+			if (isYearSame_2) {
+				if (isPeriodSame_2) {
+					time_text_2 = `พีเรียดที่ ${period_2[0]}, ปี ${year_2[0]}`;
+					range_text_2 = `${period_2[0]}, ${year_2[0]}`;
+				} else {
+					time_text_2 = `ตั้งแต่พีเรียดที่ ${period_2[0]} ถึงพีเรียดที่ ${period_2[1]}, ปี ${year_2[0]}`;
+					range_text_2 = `${period_2[0]} - ${period_2[1]}, ${year_2[0]}`;
+				}
+			} else {
+				time_text_2 = `ตั้งแต่พีเรียดที่ ${period_2[0]}, ปี ${year_2[0]} ถึงพีเรียดที่ ${period_2[1]}, ปี ${year_2[1]}`;
+				range_text_2 = `${period_2[0]}, ${year_2[0]} - ${period_2[1]}, ${year_2[1]}`;
+			}
+
+			var time_text_3 = `เปอร์เซ็นต์เปลี่ยนแปลงระหว่าง "${range_text}" กับ "${range_text_2}"`;
+
+			document.getElementById("summary-compare-title").innerHTML += ` ${time_text_3}`;
+			document.getElementById("summary-2-title").innerHTML += ` ${time_text_2}`;
+			document.getElementById("cost-per-result-compare-title").innerHTML += ` ${time_text_3}`;
+			document.getElementById("cost-per-result-2-title").innerHTML += ` ${time_text_2}`;
 		}
-	});
+	}
+}
+
+function fillPeriodInput() {
+	if (by == "period") {
+		document.getElementById("period-filter-1-start").value = period[0];
+		document.getElementById("period-filter-1-end").value = period[1];
+		document.getElementById("year-filter-1-start").value = year[0];
+		document.getElementById("year-filter-1-end").value = year[1];
+		if (compare) {
+			document.getElementById("period-filter-2-start").value = period_2[0];
+			document.getElementById("period-filter-2-end").value = period_2[1];
+			document.getElementById("year-filter-2-start").value = year_2[0];
+			document.getElementById("year-filter-2-end").value = year_2[1];
+		}
+	}
 }
 
 function fillSelect(target_id, arr) {
@@ -177,6 +231,57 @@ function fillCount() {
 	document.getElementById("ig_count").innerHTML = c_ig;
 	document.getElementById("ln_count").innerHTML = c_ln;
 	document.getElementById("gg_count").innerHTML = c_gg;
+}
+
+function fillCount2() {
+	var c_fb = 0;
+	var c_ig = 0;
+	var c_ln = 0;
+	var c_gg = 0;
+	for (let i = 0; i < platform_count_range; i++) {
+		if (platformCount_2.pid[i] == "1") {
+			c_fb = platformCount_2.count[i];
+		}
+		if (platformCount_2.pid[i] == "2") {
+			c_ig = platformCount_2.count[i];
+		}
+		if (platformCount_2.pid[i] == "3") {
+			c_ln = platformCount_2.count[i];
+		}
+		if (platformCount_2.pid[i] == "4") {
+			c_gg = platformCount_2.count[i];
+		}
+	}
+	document.getElementById("fb_count_2").innerHTML = c_fb;
+	document.getElementById("ig_count_2").innerHTML = c_ig;
+	document.getElementById("ln_count_2").innerHTML = c_ln;
+	document.getElementById("gg_count_2").innerHTML = c_gg;
+}
+
+function showData2() {
+	if (by == "period") {
+		if (compare) {
+			document.getElementById("summary-data-2-row").classList.remove("hidden");
+			document.getElementById("summary-compare-row").classList.remove("hidden");
+			document.getElementById("cost-per-result-2-row").classList.remove("hidden");
+			document.getElementById("cost-per-result-compare-row").classList.remove("hidden");
+			fillCount2();
+		}
+	}
+}
+
+function colorPercentage(table_code, row, col) {
+	for (let x = 0; x < row; x++) {
+		for (let y = 0; y < col; y++) {
+			var cellcode = `${table_code}-${x}-${y}`;
+			var cell = document.getElementById(cellcode);
+			if (cell.innerHTML.includes("+")) {
+				cell.classList.add("positive-percentage");
+			} else if (cell.innerHTML.includes("-")) {
+				cell.classList.add("negative-percentage");
+			}
+		}
+	}
 }
 
 function fillCheckboxPlatform(groupName, arr) {
@@ -466,40 +571,31 @@ function addPeriodInput(target_id, i) {
 
 // Trigger functions
 
-function periodInc() {
-	const i = periodArray.length + 1;
-	periodArray.push(i);
-	addPeriodInput("period-array", i);
-	document.getElementById("period-counter").innerHTML = i;
-}
-
-function pageInc() {
-	querySubmit(page + 1);
-}
-
-function pageDec() {
-	querySubmit(page - 1);
-}
-
-function periodDec() {
-	const i = periodArray.length - 1;
-	if (i > 0) {
-		periodArray.splice(i);
-		removeElementsByClass(`period-input-${i + 1}`);
-		document.getElementById("period-counter").innerHTML = i;
-		throwError(E6, false);
-	}
+function periodEndSet(start, end) {
+	document.getElementById(end).value = document.getElementById(start).value;
 }
 
 function queryClear() {
 	window.location.href = `/`;
 }
 
-function querySubmit(page = 1) {
+function querySubmit() {
 	var startdate = document.getElementById("startdate").value;
 	var enddate = document.getElementById("enddate").value;
-	var periods = getAllInputValue(periodArray, "period-filter-");
-	var years = getAllInputValue(periodArray, "year-filter-");
+
+	var period_1_s = document.getElementById("period-filter-1-start").value;
+	var period_2_s = document.getElementById("period-filter-2-start").value;
+	var period_1_e = document.getElementById("period-filter-1-end").value;
+	var period_2_e = document.getElementById("period-filter-2-end").value;
+	var periods_1 = [period_1_s, period_1_e];
+	var periods_2 = [period_2_s, period_2_e];
+
+	var year_1_s = document.getElementById("year-filter-1-start").value;
+	var year_2_s = document.getElementById("year-filter-2-start").value;
+	var year_1_e = document.getElementById("year-filter-1-end").value;
+	var year_2_e = document.getElementById("year-filter-2-end").value;
+	var years_1 = [year_1_s, year_1_e];
+	var years_2 = [year_2_s, year_2_e];
 
 	var platform = getListCheckedBox("platform-query").toString();
 	if (document.querySelector('input[name="single-selector"]:checked') == null) {
@@ -521,26 +617,34 @@ function querySubmit(page = 1) {
 		}
 	}
 	if (currently_interval == "period-tab") {
-		if (years.includes("-")) {
+		// var range_toggle = document.getElementById("range-toggle").checked;
+		var compare_toggle = !(year_2_s == "ปี" || period_2_s == "พีเรียด");
+
+		if (period_1_s == "พีเรียด" || period_1_e == "พีเรียด" || year_1_s == "ปี" || year_1_e == "ปี") {
 			throwError(E6, true);
 			return;
 		}
-		if (
-			periods.includes("-") &&
-			periods.filter((x) => {
-				return x == "-";
-			}).length != periodArray.length
-		) {
-			throwError(E7, true);
-			return;
+		if (compare_toggle) {
+			if (period_2_s == "พีเรียด" || period_2_e == "พีเรียด" || year_2_s == "ปี" || year_2_e == "ปี") {
+				throwError(E7, true);
+				return;
+			}
 		}
 
 		ref = ref + `&by=period`;
-		ref = ref + `&p=${page}`;
-		periods = periods.toString().replace(/-/g, "");
-		years = years.toString();
-		ref = ref + `&periods=${periods}`;
-		ref = ref + `&years=${years}`;
+		// ref = ref + `&range=${range_toggle}`;
+		ref = ref + `&compare=${compare_toggle}`;
+
+		periods_1_str = periods_1.toString();
+		years_1_str = years_1.toString();
+		ref = ref + `&periods_1=${periods_1_str}`;
+		ref = ref + `&years_1=${years_1_str}`;
+		if (compare_toggle) {
+			periods_2_str = periods_2.toString();
+			years_2_str = years_2.toString();
+			ref = ref + `&periods_2=${periods_2_str}`;
+			ref = ref + `&years_2=${years_2_str}`;
+		}
 	}
 
 	if (platform != "") {

@@ -48,7 +48,7 @@ td {
 	margin-left: 5px;
 }
 
-.nav-link {
+.tab-nav-link {
 	color: black;
 }
 
@@ -147,4 +147,12 @@ td {
 
 .icon {
 	font-size: 1em;
+}
+
+.positive-percentage {
+	color: rgb(143, 196, 63);
+}
+
+.negative-percentage {
+	color: rgb(193, 54, 54);
 }

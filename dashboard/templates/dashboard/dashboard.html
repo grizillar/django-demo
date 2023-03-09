@@ -17,9 +17,21 @@
 	var enddate = "{{ end_date }}";
 	var platform = "{{ platform }}";
 	var multiple_selector = "{{ multiple_selector }}";
-	var page = "{{ page }}";
-	var period = "{{ period }}";
-	var year = "{{ year }}";
+	var compare_toggle = "{{ compare }}";
+	var period = "{{ periods_1 }}";
+	var year = "{{ years_1 }}";
+
+	var compare = compare_toggle == "True";
+	if (compare) {
+		var period_2 = "{{ periods_2 }}";
+		var year_2 = "{{ years_2 }}";
+		var summary_2JSON = "{{ summary_2JSON }}";
+		var CPR_2JSON = "{{ CPR_2JSON }}";
+		var platformCount_2JSON = "{{ platformCount_2JSON }}";
+		var arraySummaryByPeriod_2 = "{{ arraySummaryByPeriod_2 }}";
+		var summaryCompareJSON = "{{ summaryCompareJSON }}";
+		var CPRCompareJSON = "{{ CPRCompareJSON }}";
+	}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -38,10 +50,10 @@
 						<div class="col">
 							<ul class="nav nav-tabs" id="time-interval" role="tablist">
 								<li class="nav-item" role="presentation">
-									<button class="nav-link active" id="date-tab" data-bs-toggle="tab" data-bs-target="#date-pane" type="button" role="tab" aria-controls="date" aria-selected="true">ตามวันที่</button>
+									<button class="nav-link active tab-nav-link" id="date-tab" data-bs-toggle="tab" data-bs-target="#date-pane" type="button" role="tab" aria-controls="date" aria-selected="true">ตามวันที่</button>
 								</li>
 								<li class="nav-item" role="presentation">
-									<button class="nav-link" id="period-tab" data-bs-toggle="tab" data-bs-target="#period-pane" type="button" role="tab" aria-controls="period" aria-selected="false">ตามพีเรียด</button>
+									<button class="nav-link tab-nav-link" id="period-tab" data-bs-toggle="tab" data-bs-target="#period-pane" type="button" role="tab" aria-controls="period" aria-selected="false">ตามพีเรียด</button>
 								</li>
 							</ul>
 							<div class="tab-content" id="time-interval-contents">
@@ -55,13 +67,122 @@
 								<div class="tab-pane fade" id="period-pane" role="tabpanel" aria-labelledby="period-tab">
 									<p style="font-size: large"><strong>ช่วงพีเรียด</strong></p>
 									<div id="period-array">
-										<!-- Period Element Fill up here -->
+										<div class="period-input-1">
+											<p style="font-size: medium"><strong>พีเรียดที่ 1</strong></p>
+											<div class="d-flex justify-content-between" id="period-1-start">
+												<label for="period-1-start">เริ่มต้น: </label>
+												<div class="d-inline-flex">
+													<select class="form-select" aria-label="period" id="period-filter-1-start" onchange="throwError(E6, false), periodEndSet('period-filter-1-start', 'period-filter-1-end')">
+														<option selected>พีเรียด</option>
+														<option value="1">1</option>
+														<option value="2">2</option>
+														<option value="3">3</option>
+														<option value="4">4</option>
+														<option value="5">5</option>
+														<option value="6">6</option>
+														<option value="7">7</option>
+														<option value="8">8</option>
+														<option value="9">9</option>
+														<option value="10">10</option>
+														<option value="11">11</option>
+														<option value="12">12</option>
+														<option value="13">13</option>
+													</select>
+													<select class="form-select" aria-label="year" id="year-filter-1-start" onchange="throwError(E6, false), periodEndSet('year-filter-1-start', 'year-filter-1-end')" ;>
+														<option selected>ปี</option>
+													</select>
+												</div>
+											</div>
+											<div class="d-flex justify-content-between" id="period-1-end">
+												<label for="period-1-end">สิ้นสุด: </label>
+												<div class="d-inline-flex">
+													<select class="form-select" aria-label="period" id="period-filter-1-end" onchange="throwError(E6, false)">
+														<option selected>พีเรียด</option>
+														<option value="1">1</option>
+														<option value="2">2</option>
+														<option value="3">3</option>
+														<option value="4">4</option>
+														<option value="5">5</option>
+														<option value="6">6</option>
+														<option value="7">7</option>
+														<option value="8">8</option>
+														<option value="9">9</option>
+														<option value="10">10</option>
+														<option value="11">11</option>
+														<option value="12">12</option>
+														<option value="13">13</option>
+													</select>
+													<select class="form-select" aria-label="year" id="year-filter-1-end" onchange="throwError(E6, false)" ;>
+														<option selected>ปี</option>
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="period-input-2" id="period-input-2">
+											<p style="font-size: medium"><strong>พีเรียดที่ 2</strong></p>
+											<div class="d-flex justify-content-between" id="period-2-start">
+												<label for="period-2-start">เริ่มต้น: </label>
+												<div class="d-inline-flex">
+													<select class="form-select" aria-label="period" id="period-filter-2-start" onchange="periodEndSet('period-filter-2-start', 'period-filter-2-end')">
+														<option selected>พีเรียด</option>
+														<option value="1">1</option>
+														<option value="2">2</option>
+														<option value="3">3</option>
+														<option value="4">4</option>
+														<option value="5">5</option>
+														<option value="6">6</option>
+														<option value="7">7</option>
+														<option value="8">8</option>
+														<option value="9">9</option>
+														<option value="10">10</option>
+														<option value="11">11</option>
+														<option value="12">12</option>
+														<option value="13">13</option>
+													</select>
+													<select class="form-select" aria-label="year" id="year-filter-2-start" onchange="throwError(E6, false), periodEndSet('year-filter-2-start', 'year-filter-2-end')" ;>
+														<option selected>ปี</option>
+													</select>
+												</div>
+											</div>
+											<div class="d-flex justify-content-between" id="period-2-end">
+												<label for="period-2-end">สิ้นสุด: </label>
+												<div class="d-inline-flex">
+													<select class="form-select" aria-label="period" id="period-filter-2-end">
+														<option selected>พีเรียด</option>
+														<option value="1">1</option>
+														<option value="2">2</option>
+														<option value="3">3</option>
+														<option value="4">4</option>
+														<option value="5">5</option>
+														<option value="6">6</option>
+														<option value="7">7</option>
+														<option value="8">8</option>
+														<option value="9">9</option>
+														<option value="10">10</option>
+														<option value="11">11</option>
+														<option value="12">12</option>
+														<option value="13">13</option>
+													</select>
+													<select class="form-select" aria-label="year" id="year-filter-2-end" onchange="throwError(E6, false)" ;>
+														<option selected>ปี</option>
+													</select>
+												</div>
+											</div>
+										</div>
 									</div>
-									<div id="count-control" class="d-inline-flex justify-content-end align-items-center w-100">
+									<!-- <div class="form-check form-switch">
+										<input class="form-check-input" type="checkbox" id="range-toggle" name="range-toggle" onchange="rangeToggle()" />
+										<label class="form-check-label">เพิ่มช่วงของพีเรียด</label>
+									</div>
+									<div class="form-check form-switch">
+										<input class="form-check-input" type="checkbox" id="compare-toggle" name="compare-toggle" onchange="compareToggle()" />
+										<label class="form-check-label">เพิ่มพีเรียด</label>
+									</div> -->
+									<!-- <div id="count-control" class="d-inline-flex justify-content-end align-items-center w-100">
 										<button type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="periodDec()">-</button>
 										<p class="counter" id="period-counter">1</p>
 										<button type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="periodInc()">+</button>
-									</div>
+									</div> -->
 								</div>
 							</div>
 						</div>
@@ -134,8 +255,8 @@
 						</div>
 					</div>
 					<div class="row">
-						<div id="E6" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E6):</b> ไม่พบข้อมูลปีในช่วงพีเรียด</div>
-						<div id="E7" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E6):</b> ช่วงของพีเรียดไม่เท่ากัน</div>
+						<div id="E6" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E6):</b> โปรดกรอกช่วงพีเรียดในพีเรียดที่ 1</div>
+						<div id="E7" class="alert alert-danger sign hidden" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <b>เกิดข้อผิดพลาด (E7):</b> โปรดกรอกช่วงพีเรียดในพีเรียดที่ 2</div>
 						<div class="d-flex justify-content-end query-submit-buttons">
 							<!-- <button type="button" onclick="testbutton()" class="btn override">ทดสอบ</button> -->
 							<button type="button" onclick="queryClear()" class="btn btn-danger override">ล้าง</button>
@@ -148,16 +269,11 @@
 		</div>
 	</div>
 	<div class="shadow section">
-		<div id="page-selection" class="d-inline-flex justify-content-between align-items-center w-100">
-			<button id="page-dec" type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="pageDec()"><i class="bi bi-arrow-left-circle-fill"></i></button>
-			<p class="counter" id="page-name"></p>
-			<button id="page-inc" type="button" class="count-btn btn btn-primary btn-circle rounded-circle" onclick="pageInc()"><i class="bi bi-arrow-right-circle-fill"></i></button>
-		</div>
-		<div class="row gx-3">
-			<div class="col-9">
+		<div class="row gx-3 hidden" id="summary-compare-row">
+			<div class="col-12">
 				<div class="card">
 					<div class="card-body">
-						<p class="graph-title">ตาราง Summary {% if start_date %} ตั้งแต่วันที่ {{ start_date }} {% endif %} {% if end_date %} ถึงวันที่ {{ end_date }} {% endif %}</p>
+						<p class="graph-title" id="summary-compare-title">ตาราง Summary {% if start_date %} ตั้งแต่วันที่ {{ start_date }} {% endif %} {% if end_date %} ถึงวันที่ {{ end_date }} {% endif %}</p>
 						<table class="table cell">
 							<thead class="table-dark">
 								<tr>
@@ -179,7 +295,39 @@
 									<th scope="col">Revenue</th>
 								</tr>
 							</thead>
-							<tbody id="db1"></tbody>
+							<tbody id="summary-compare-table"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row gx-3">
+			<div class="col-9">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title" id="summary-1-title">ตาราง Summary {% if start_date %} ตั้งแต่วันที่ {{ start_date }} {% endif %} {% if end_date %} ถึงวันที่ {{ end_date }} {% endif %}</p>
+						<table class="table cell">
+							<thead class="table-dark">
+								<tr>
+									<th rowspan="2" scope="col">#</th>
+									<th rowspan="2" scope="col">Platform</th>
+									<th rowspan="2" scope="col">Spending</th>
+									<th colspan="2" scope="col">Awareness</th>
+									<th colspan="1" scope="col">Interest</th>
+									<th colspan="2" scope="col">Desire</th>
+									<th colspan="2" scope="col">Action</th>
+								</tr>
+								<tr>
+									<th scope="col">Reach</th>
+									<th scope="col">Impression</th>
+									<th scope="col">Engagement</th>
+									<th scope="col">User</th>
+									<th scope="col">New User</th>
+									<th scope="col">Order</th>
+									<th scope="col">Revenue</th>
+								</tr>
+							</thead>
+							<tbody id="summary"></tbody>
 						</table>
 					</div>
 				</div>
@@ -249,6 +397,102 @@
 				</div>
 			</div>
 		</div>
+		<div class="row gx-3 hidden" id="summary-data-2-row">
+			<div class="col-9">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title" id="summary-2-title">ตาราง Summary {% if start_date %} ตั้งแต่วันที่ {{ start_date }} {% endif %} {% if end_date %} ถึงวันที่ {{ end_date }} {% endif %}</p>
+						<table class="table cell">
+							<thead class="table-dark">
+								<tr>
+									<th rowspan="2" scope="col">#</th>
+									<th rowspan="2" scope="col">Platform</th>
+									<th rowspan="2" scope="col">Spending</th>
+									<th colspan="2" scope="col">Awareness</th>
+									<th colspan="1" scope="col">Interest</th>
+									<th colspan="2" scope="col">Desire</th>
+									<th colspan="2" scope="col">Action</th>
+								</tr>
+								<tr>
+									<th scope="col">Reach</th>
+									<th scope="col">Impression</th>
+									<th scope="col">Engagement</th>
+									<th scope="col">User</th>
+									<th scope="col">New User</th>
+									<th scope="col">Order</th>
+									<th scope="col">Revenue</th>
+								</tr>
+							</thead>
+							<tbody id="summary-2"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-3 d-flex">
+				<div class="container">
+					<div class="row d-flex">
+						<div class="card facebook_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-facebook"></i> Facebook</div>
+									<div><b id="fb_count_2"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card instagram_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-instagram"></i> Instagram</div>
+									<div><b id="ig_count_2"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card line_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-line"></i> Line</div>
+									<div><b id="ln_count_2"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card google_color">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div><i class="icon bi bi-google"></i> Google Ads</div>
+									<div><b id="gg_count_2"></b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div>Total Campaign</div>
+									<div><b id="campaign_count">{{ campaign_count_2 }}</b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row d-flex">
+						<div class="card">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div>Total Site Traffic</div>
+									<div><b id="sitetraffic_count">{{ sitetraffic_count_2 }}</b></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
 		<div class="row" id="chart-test-1"></div>
 		<div class="row">
@@ -266,7 +510,7 @@
 	</div>
 
 	<div class="shadow section">
-		<div class="row">
+		<div class="row gx-3 hidden" id="cost-per-result-compare-row">
 			<!-- <div class="col-2 d-flex">
 			<div class="card w-100">
 				<div class="card-body">
@@ -277,7 +521,7 @@
 			<div class="col-12">
 				<div class="card">
 					<div class="card-body">
-						<p class="graph-title">ตารางค่าเฉลี่ย Cost per Result</p>
+						<p class="graph-title" id="cost-per-result-compare-title">ตารางค่าเฉลี่ย Cost per Result</p>
 						<table class="table cell">
 							<thead class="table-dark">
 								<tr>
@@ -299,7 +543,85 @@
 									<th scope="col">Cost/<br />Purchase</th>
 								</tr>
 							</thead>
-							<tbody id="db2"></tbody>
+							<tbody id="costperresult-compare"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<!-- <div class="col-2 d-flex">
+			<div class="card w-100">
+				<div class="card-body">
+					<p>Empty card</p>
+				</div>
+			</div>
+		</div> -->
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title" id="cost-per-result-1-title">ตารางค่าเฉลี่ย Cost per Result</p>
+						<table class="table cell">
+							<thead class="table-dark">
+								<tr>
+									<th rowspan="2" scope="col">Objective</th>
+									<th rowspan="2" scope="col">Spending</th>
+									<th colspan="2" scope="col">Awareness</th>
+									<th colspan="2" scope="col">Interest</th>
+									<th colspan="3" scope="col">Desire</th>
+									<th colspan="1" scope="col">Action</th>
+								</tr>
+								<tr>
+									<th scope="col">Cost/<br />Reach</th>
+									<th scope="col">Cost/<br />Impression</th>
+									<th scope="col">Cost/<br />Engagement</th>
+									<th scope="col">Cost/<br />VideoView</th>
+									<th scope="col">Cost/<br />LandingPage</th>
+									<th scope="col">Cost/<br />ProductView</th>
+									<th scope="col">Cost/<br />AddtoCart</th>
+									<th scope="col">Cost/<br />Purchase</th>
+								</tr>
+							</thead>
+							<tbody id="costperresult"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row gx-3 hidden" id="cost-per-result-2-row">
+			<!-- <div class="col-2 d-flex">
+			<div class="card w-100">
+				<div class="card-body">
+					<p>Empty card</p>
+				</div>
+			</div>
+		</div> -->
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<p class="graph-title" id="cost-per-result-2-title">ตารางค่าเฉลี่ย Cost per Result</p>
+						<table class="table cell">
+							<thead class="table-dark">
+								<tr>
+									<th rowspan="2" scope="col">Objective</th>
+									<th rowspan="2" scope="col">Spending</th>
+									<th colspan="2" scope="col">Awareness</th>
+									<th colspan="2" scope="col">Interest</th>
+									<th colspan="3" scope="col">Desire</th>
+									<th colspan="1" scope="col">Action</th>
+								</tr>
+								<tr>
+									<th scope="col">Cost/<br />Reach</th>
+									<th scope="col">Cost/<br />Impression</th>
+									<th scope="col">Cost/<br />Engagement</th>
+									<th scope="col">Cost/<br />VideoView</th>
+									<th scope="col">Cost/<br />LandingPage</th>
+									<th scope="col">Cost/<br />ProductView</th>
+									<th scope="col">Cost/<br />AddtoCart</th>
+									<th scope="col">Cost/<br />Purchase</th>
+								</tr>
+							</thead>
+							<tbody id="costperresult-2"></tbody>
 						</table>
 					</div>
 				</div>

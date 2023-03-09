@@ -250,6 +250,8 @@ function filteredPlatformColorByPlatformName(platform_name) {
 }
 
 function fillDount() {
+	const color_range = ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"];
+
 	function filteredNullandZero(arr, arr_platform_name) {
 		var new_arr = [];
 		var new_platform = [];
@@ -273,31 +275,45 @@ function fillDount() {
 				{
 					label: multiple_selector[i],
 					data: filtered_data.data,
-					backgroundColor: filteredPlatformColor,
+					backgroundColor: filteredPlatformColorByPlatformName(filtered_data.platform),
 					hoverOffset: 4,
 				},
 			],
 		};
 
 		if (by == "period") {
-			var data_arr = [];
-			var filtered_platform = [];
-			for (let j = 0; j < summaryArray.length; j++) {
-				var filtered_data_frag = filteredNullandZero(formArray(summaryArray[j][multiple_selector[i]]), formArray(summaryArray[j].platform_name));
-				var data_format = {
+			if (compare) {
+				var filtered_data_2 = filteredNullandZero(formArray(summary_2[multiple_selector[i]]), formArray(summary_2.platform_name));
+				data_d.datasets.push({
 					label: multiple_selector[i],
-					data: formArray(summaryArray[j][multiple_selector[i]]),
-					backgroundColor: ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"],
+					data: filtered_data_2.data,
+					backgroundColor: filteredPlatformColorByPlatformName(filtered_data_2.platform),
 					hoverOffset: 4,
-				};
-				filtered_platform = arrayUnion(filtered_platform, filtered_data_frag.platform);
-				console.log(data_format.backgroundColor);
-
-				data_arr.push(data_format);
+				});
+				var platform_label = arrayUnion(filtered_data.platform, filtered_data_2.platform);
+				data_d.labels = platform_label;
 			}
-			data_d.labels = formArray(summaryArray[0].platform_name);
-			data_d.datasets = data_arr;
 		}
+
+		// if (by == "period") {
+		// 	var data_arr = [];
+		// 	var filtered_platform = [];
+		// 	for (let j = 0; j < summaryArray.length; j++) {
+		// 		var filtered_data_frag = filteredNullandZero(formArray(summaryArray[j][multiple_selector[i]]), formArray(summaryArray[j].platform_name));
+		// 		var data_format = {
+		// 			label: multiple_selector[i],
+		// 			data: formArray(summaryArray[j][multiple_selector[i]]),
+		// 			backgroundColor: ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"],
+		// 			hoverOffset: 4,
+		// 		};
+		// 		filtered_platform = arrayUnion(filtered_platform, filtered_data_frag.platform);
+		// 		console.log(data_format.backgroundColor);
+
+		// 		data_arr.push(data_format);
+		// 	}
+		// 	data_d.labels = formArray(summary.platform_name);
+		// 	data_d.datasets = data_arr;
+		// }
 
 		var config_d = {
 			type: "doughnut",
@@ -309,13 +325,14 @@ function fillDount() {
 						callbacks: {
 							title: (context) => {
 								var index = context[0].datasetIndex;
-								if (by == "date") {
-									return context.title;
-								}
-								if (period[index] == "") {
-									return `ปี ${year[index]}`;
-								}
-								return `พีเรียด ${period[index]}, ปี ${year[index]}`;
+								return context.title;
+								// if (by == "date") {
+								// 	return context.title;
+								// }
+								// if (period[index] == "") {
+								// 	return `ปี ${year[index]}`;
+								// }
+								// return `พีเรียด ${period[index]}, ปี ${year[index]}`;
 							},
 							label: (context) => {
 								let label = context.label;
@@ -487,6 +504,7 @@ if (by == "date") {
 }
 
 if (by == "period") {
+	console.log(by);
 	const data_l1_p = {
 		labels: interpretPeriod(PERIODINYEAR),
 		datasets: formDatasetWithPeriod(),

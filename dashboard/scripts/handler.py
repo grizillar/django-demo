@@ -56,6 +56,18 @@ def colCheck(col, type):
         return False
 
 
+def dataframeIncrement(df1, df2, exception):
+    df = pd.DataFrame()
+    df1.fillna(0, inplace=True)
+    df2.fillna(0, inplace=True)
+    for col in df1.columns:
+        if col in exception:
+            df[col] = df1[col]
+        else:
+            df[col] = df1[col] + df2[col]
+    return df
+
+
 def listToSQLString(lst):
     if (type(lst) is list):
         if len(lst) == 0:
@@ -96,6 +108,43 @@ def getPeriodRange(period):
     if period == None or period == '':
         return "('1','2','3','4','5','6','7','8','9','10','11','12','13')"
     return f"('{period}')"
+
+
+def formPeriodRange(period, year):
+    if len(period) == 1:
+        return (period, year)
+
+    start_period = int(period[0])
+    start_year = int(year[0])
+    end_period = int(period[1])
+    end_year = int(year[1])
+
+    periods = []
+    years = []
+    year_diff = end_year - start_year
+
+    if year_diff < 0:
+        return (periods, years)
+    if year_diff == 0:
+        for i in range(start_period, end_period+1):
+            periods.append(i)
+            years.append(start_year)
+    if year_diff > 0:
+        p = start_period
+        y = start_year
+        while y < end_year:
+            if p == 13:
+                periods.append(p)
+                years.append(y)
+                y += 1
+            else:
+                periods.append(p)
+                years.append(y)
+                p += 1
+        for i in range(1, end_period+1):
+            periods.append(i)
+            years.append(end_year)
+    return (periods, years)
 
 
 def formQueryArray(func, period_list, year_list, platform):
@@ -450,10 +499,20 @@ def getPlatformCountByPeriod(period=None, year=None, platform=None):
     platform = listToSQLString(normalizePlatform(platform))
 
     query = f"""
-        SELECT c.pid as 'pid', COUNT(c.cid) as 'count'
-        FROM Campaign as c
-        WHERE c.period in {period} AND c.year = {year} AND c.pid IN {platform}
-        GROUP BY c.pid
+        SELECT p.pid, c.count
+        FROM
+        (
+			SELECT p.pid, p.platform_name
+			FROM Platform as p
+        ) p
+        LEFT JOIN
+        (
+		    SELECT c.pid as 'pid', COUNT(c.cid) as 'count'
+            FROM Campaign as c
+            WHERE c.period in {period} AND c.year = {year} AND c.pid IN {platform}
+            GROUP BY c.pid
+        ) c
+        ON c.pid = p.pid
     """
 
     platformCount = pd.read_sql_query(query, con=engine)
@@ -490,6 +549,24 @@ def getSitetrafficLengthByPeriod(period=None, year=None, platform=None):
 
 
 def getCostPerResultByPeriod(period=None, year=None, platform=None):
+    def applyBaseCPR(df):
+        objectives = ["link_click", "reach", "engagement",
+                      "video_thruplay", "view_product", "add_to_cart", "purchase"]
+        columns = ["objective", 'spending', 'cost/reach', 'cost/impression', 'cost/engagement',
+                   'cost/video_view', 'cost/landing_page_view', 'cost/product_view', 'cost/add_to_cart', 'cost/purchase']
+        filler = {"objective": None, 'spending': 0, 'cost/reach': 0, 'cost/impression': 0, 'cost/engagement': 0,
+                  'cost/video_view': 0, 'cost/landing_page_view': 0, 'cost/product_view': 0, 'cost/add_to_cart': 0, 'cost/purchase': 0}
+        base = pd.DataFrame(columns=columns)
+
+        for objective in objectives:
+            if objective in list(df["objective"]):
+                base.loc[len(base)] = df.loc[df['objective']
+                                             == objective].to_dict(orient="split")["data"][0]
+            else:
+                filler["objective"] = objective
+                base.loc[len(base)] = filler
+
+        return base
 
     period = getPeriodRange(period)
 
@@ -522,6 +599,8 @@ def getCostPerResultByPeriod(period=None, year=None, platform=None):
     """
 
     costperresult = pd.read_sql_query(query, con=engine)
+    costperresult.fillna(0, inplace=True)
+    costperresult = applyBaseCPR(costperresult)
 
     return costperresult
 
@@ -564,3 +643,42 @@ def getSummaryByPeriod(period=None, year=None, platform=None):
     summaryPerPeriod.fillna(0, inplace=True)
 
     return summaryPerPeriod
+
+
+def queryByPeriodinRange(query, periods, years, platform):
+    c = len(periods)
+    df = query(periods[0], years[0], platform)
+    df.fillna(0, inplace=True)
+    for i in range(1, c):
+        q = query(periods[i], years[i], platform).fillna(0)
+        df = dataframeIncrement(df, q, [
+                                "pid", "platform_name", "objective"])
+    return df
+
+
+def intByPeriodinRange(query, periods, years, platform):
+    c = len(periods)
+    s = 0
+    for i in range(0, c):
+        s = s + query(periods[i], years[i], platform)
+
+    return s
+
+
+def percentageChange(old_df, new_df):
+    def format(x):
+        if x > 0:
+            return f'+{x}%'
+        else:
+            return f'{x}%'
+
+    dfc = pd.DataFrame()
+    exception = ["pid", "platform_name", "objective"]
+    for c in old_df.columns:
+        if c not in exception:
+            dfc[c] = round((new_df[c] - old_df[c])/old_df[c] * 100, 2)
+            dfc[c] = dfc[c].apply(format)
+
+        else:
+            dfc[c] = old_df[c]
+    return dfc

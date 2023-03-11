@@ -48,6 +48,7 @@ def dashboard(request):
         summary = handler.getAllSummary(sdate, edate, platform)
         costPerResult = handler.getCostPerResult(sdate, edate, platform)
         summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
+        totalSummary = handler.getTotalRow(summary)
 
         # topCPRarray = []
         # for s in multiple_selector:
@@ -74,10 +75,14 @@ def dashboard(request):
         years_1 = request.GET.get("years_1").split(",")
 
         periodrange_1 = handler.formPeriodRange(periods_1, years_1)
+        allyear = list(dict.fromkeys(periodrange_1[1]))
+        print(periodrange_1)
 
         summary = handler.queryByPeriodinRange(
             handler.getAllSummaryByPeriod, periodrange_1[0], periodrange_1[1], platform
         )
+
+        totalSummary = handler.getTotalRow(summary)
 
         platformCount = handler.queryByPeriodinRange(
             handler.getPlatformCountByPeriod, periodrange_1[0], periodrange_1[1], platform
@@ -105,17 +110,23 @@ def dashboard(request):
         summaryPerMonth = handler.getSummaryPerMonth(sdate, edate, platform)
 
         arraySummaryByPeriod = handler.formQueryArray(
-            handler.getSummaryByPeriod, periodrange_1[0], periodrange_1[1], platform
+            handler.getSummaryByPeriod, periodrange_1[0], allyear, platform
         )
+
+        # summaryByPeriod = handler.queryByPeriodinConcat(
+        #     handler.getSummaryBySinglePeriod, periodrange_1[0], periodrange_1[1], platform
+        # )
 
         if compare_toggle:
             periods_2 = request.GET.get("periods_2").split(",")
             years_2 = request.GET.get("years_2").split(",")
             periodrange_2 = handler.formPeriodRange(periods_2, years_2)
+            allyear = list(dict.fromkeys(allyear + periodrange_2[1]))
 
             summary_2 = handler.queryByPeriodinRange(
                 handler.getAllSummaryByPeriod, periodrange_2[0], periodrange_2[1], platform
             )
+            totalSummary_2 = handler.getTotalRow(summary_2)
 
             platformCount_2 = handler.queryByPeriodinRange(
                 handler.getPlatformCountByPeriod, periodrange_2[0], periodrange_2[1], platform
@@ -132,11 +143,14 @@ def dashboard(request):
                 handler.getCostPerResultByPeriod, periodrange_2[0], periodrange_2[1], platform
             )
 
-            arraySummaryByPeriod_2 = handler.formQueryArray(
-                handler.getSummaryByPeriod, periodrange_2[0], periodrange_2[1], platform
+            # replace
+            arraySummaryByPeriod = handler.formQueryArray(
+                handler.getSummaryByPeriod, None, allyear, platform
             )
 
             summaryCompare = handler.percentageChange(summary, summary_2)
+            totalSummaryCompare = handler.percentageChange(
+                totalSummary, totalSummary_2)
             CPRCompare = handler.percentageChange(
                 costPerResult, costPerResult_2)
     context = {
@@ -149,6 +163,7 @@ def dashboard(request):
         "platform": context_platform,
         "multiple_selector": context_multiple_selector,
         "summaryJSON": summary.to_json(),
+        "totalSummaryJSON": totalSummary.to_json(),
         "CPRJSON": costPerResult.to_json(),
         "summaryPMJSON": summaryPerMonth.to_json(),
         "platformCountJSON": platformCount.to_json(),
@@ -167,13 +182,14 @@ def dashboard(request):
             context["periods_2"] = ','.join(periods_2)
             context["years_2"] = ','.join(years_2)
             context["summary_2JSON"] = summary_2.to_json()
+            context["totalSummary_2JSON"] = totalSummary_2.to_json()
             context["platformCount_2JSON"] = platformCount_2.to_json()
             context["campaign_count_2"] = campaignCount_2
             context["sitetraffic_count_2"] = siteTrafficCount_2
             context["CPR_2JSON"] = costPerResult_2.to_json()
-            context["arraySummaryByPeriod_2"] = arraySummaryByPeriod_2
             context["summaryCompareJSON"] = summaryCompare.to_json()
             context["CPRCompareJSON"] = CPRCompare.to_json()
+            context["totalSummaryCompareJSON"] = totalSummaryCompare.to_json()
     return render(request, 'dashboard/dashboard.html', context)
 
 

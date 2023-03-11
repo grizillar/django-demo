@@ -37,6 +37,59 @@ function formDateRange() {
 	return [month, year];
 }
 
+function formPeriodRange(period, year) {
+	const period_start = parseInt(period[0]);
+	const period_end = parseInt(period[1]);
+	const year_start = parseInt(year[0]);
+	const year_end = parseInt(year[1]);
+
+	const isPeriodSame = period_start == period_end;
+	const isYearSame = year_start == year_end;
+
+	if (isYearSame) {
+		if (isPeriodSame) {
+			return {
+				periods: [period_start],
+				years: [year_start],
+			};
+		} else {
+			var periods = [];
+			var years = [];
+			for (let i = period_start; i <= period_end; i++) {
+				periods.push(i);
+				years.push(year_start);
+			}
+			return {
+				periods: periods,
+				years: years,
+			};
+		}
+	} else {
+		var periods = [];
+		var years = [];
+		let currperiod = period_start;
+		let curryear = year_start;
+		while (curryear < year_end) {
+			periods.push(currperiod);
+			years.push(curryear);
+			if (currperiod >= 13) {
+				curryear++;
+				currperiod = 1;
+			} else {
+				currperiod++;
+			}
+		}
+		for (let i = 1; i <= period_end; i++) {
+			periods.push(i);
+			years.push(curryear);
+		}
+		return {
+			periods: periods,
+			years: years,
+		};
+	}
+}
+
 function fillTitleNameSPMT(target_p, earliestMonth, lastestMonth) {
 	var target = document.getElementById(target_p);
 	target.innerHTML += `ตั้งแต่ ${monthof(earliestMonth[0])}, ${earliestMonth[1]} ถึง ${monthof(lastestMonth[0])}, ${lastestMonth[1]}`;
@@ -84,9 +137,7 @@ function fillDataByDate(sumdata, data, range) {
 
 function fillDataByPeriod(sumdata, data) {
 	const dataArr = formArray(data);
-	console.log(formArray(sumdata.period));
 
-	console.log(dataArr);
 	var filledArr = [];
 	let currPeriod = 1;
 	for (let i = 0; i < 13; i++) {
@@ -120,7 +171,7 @@ function formDatasetWithDate(data, target_list) {
 	// 		labels.push(target_list[i]);
 	// 	}
 	// }
-	var labels = ["reach", "impression", "engagement"];
+	var labels = target_list;
 	var datasets = [];
 	for (let i = 0; i < labels.length; i++) {
 		var label = {
@@ -133,13 +184,16 @@ function formDatasetWithDate(data, target_list) {
 }
 
 // Can choose only one
-function formDatasetWithPeriod() {
+function formDatasetWithPeriod(target) {
 	var labels = removeDuplicate(year);
+	if (compare) {
+		labels = removeDuplicate(year.concat(year_2));
+	}
 	var datasets = [];
 	for (let i = 0; i < labels.length; i++) {
 		var label = {
 			label: labels[i],
-			data: fillDataByPeriod(summaryByPeriodArray[i], summaryByPeriodArray[i].engagement),
+			data: fillDataByPeriod(summaryByPeriodArray[i], summaryByPeriodArray[i][target]),
 		};
 		datasets.push(label);
 	}
@@ -249,7 +303,55 @@ function filteredPlatformColorByPlatformName(platform_name) {
 	return color;
 }
 
-function fillDount() {
+function getPeriodRangeName() {
+	var time_text = "";
+	var range_text = "";
+	var time_text_2 = "";
+	var range_text_2 = "";
+	var isYearSame = year[0] == year[1];
+	var isPeriodSame = period[0] == period[1];
+	if (isYearSame) {
+		if (isPeriodSame) {
+			time_text = `พีเรียดที่ ${period[0]}, ปี ${year[0]}`;
+			range_text = `${period[0]}, ${year[0]}`;
+		} else {
+			time_text = `ตั้งแต่พีเรียดที่ ${period[0]} ถึงพีเรียดที่ ${period[1]}, ปี ${year[0]}`;
+			range_text = `${period[0]} - ${period[1]}, ${year[0]}`;
+		}
+	} else {
+		time_text = `ตั้งแต่พีเรียดที่ ${period[0]}, ปี ${year[0]} ถึงพีเรียดที่ ${period[1]}, ปี ${year[1]}`;
+		range_text = `${period[0]}, ${year[0]} - ${period[1]}, ${year[1]}`;
+	}
+
+	if (compare) {
+		var isYearSame_2 = year_2[0] == year_2[1];
+		var isPeriodSame_2 = period_2[0] == period_2[1];
+		if (isYearSame_2) {
+			if (isPeriodSame_2) {
+				time_text_2 = `พีเรียดที่ ${period_2[0]}, ปี ${year_2[0]}`;
+				range_text_2 = `${period_2[0]}, ${year_2[0]}`;
+			} else {
+				time_text_2 = `ตั้งแต่พีเรียดที่ ${period_2[0]} ถึงพีเรียดที่ ${period_2[1]}, ปี ${year_2[0]}`;
+				range_text_2 = `${period_2[0]} - ${period_2[1]}, ${year_2[0]}`;
+			}
+		} else {
+			time_text_2 = `ตั้งแต่พีเรียดที่ ${period_2[0]}, ปี ${year_2[0]} ถึงพีเรียดที่ ${period_2[1]}, ปี ${year_2[1]}`;
+			range_text_2 = `${period_2[0]}, ${year_2[0]} - ${period_2[1]}, ${year_2[1]}`;
+		}
+	}
+	return {
+		period_1st: {
+			text: time_text,
+			range: range_text,
+		},
+		period_2nd: {
+			text: time_text_2,
+			range: range_text_2,
+		},
+	};
+}
+
+function fillDountExecute() {
 	const color_range = ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"];
 
 	function filteredNullandZero(arr, arr_platform_name) {
@@ -295,26 +397,6 @@ function fillDount() {
 			}
 		}
 
-		// if (by == "period") {
-		// 	var data_arr = [];
-		// 	var filtered_platform = [];
-		// 	for (let j = 0; j < summaryArray.length; j++) {
-		// 		var filtered_data_frag = filteredNullandZero(formArray(summaryArray[j][multiple_selector[i]]), formArray(summaryArray[j].platform_name));
-		// 		var data_format = {
-		// 			label: multiple_selector[i],
-		// 			data: formArray(summaryArray[j][multiple_selector[i]]),
-		// 			backgroundColor: ["rgb(66,103,178)", "rgb(255, 51, 153)", "rgb(102, 255, 102)", "rgb(255, 80, 80)", "rgb(255, 255, 102)", "rgb(204, 0, 153)", "rgb(204, 204, 204)"],
-		// 			hoverOffset: 4,
-		// 		};
-		// 		filtered_platform = arrayUnion(filtered_platform, filtered_data_frag.platform);
-		// 		console.log(data_format.backgroundColor);
-
-		// 		data_arr.push(data_format);
-		// 	}
-		// 	data_d.labels = formArray(summary.platform_name);
-		// 	data_d.datasets = data_arr;
-		// }
-
 		var config_d = {
 			type: "doughnut",
 			data: data_d,
@@ -325,10 +407,21 @@ function fillDount() {
 						callbacks: {
 							title: (context) => {
 								var index = context[0].datasetIndex;
-								return context.title;
-								// if (by == "date") {
-								// 	return context.title;
-								// }
+								if (by == "date") {
+									return context.title;
+								}
+								if (by == "period") {
+									if (!compare) {
+										return getPeriodRangeName().period_1st.range;
+									} else {
+										if (index == 0) {
+											return getPeriodRangeName().period_1st.range;
+										}
+										if (index == 1) {
+											return getPeriodRangeName().period_2nd.range;
+										}
+									}
+								}
 								// if (period[index] == "") {
 								// 	return `ปี ${year[index]}`;
 								// }
@@ -368,6 +461,38 @@ function fillDount() {
 			plugins: [ChartDataLabels],
 		};
 		new Chart(document.getElementById(`rd-${i}`), config_d);
+	}
+}
+
+function fillCompareBarGraphExecute() {
+	if (by == "period" && compare) {
+		for (let i = 0; i < multiple_selector.length; i++) {
+			const period_range = getPeriodRangeName();
+			const labels = [period_range.period_1st.range, period_range.period_2nd.range];
+			const data = {
+				labels: labels,
+				datasets: [
+					{
+						label: multiple_selector[i],
+						data: [totalSummary[multiple_selector[i]][0], totalSummary_2[multiple_selector[i]][0]],
+						borderWidth: 1,
+					},
+				],
+			};
+			const config = {
+				type: "bar",
+				data: data,
+				options: {
+					scales: {
+						y: {
+							beginAtZero: true,
+						},
+					},
+					barPercentage: 0.8,
+				},
+			};
+			new Chart(document.getElementById(`cbg-${i}`), config);
+		}
 	}
 }
 
@@ -412,125 +537,75 @@ const config_d1 = {
 	},
 };
 
-// const config_s1 = {
-// 	type: "scatter",
-// 	data: data_s1,
-// 	options: {
-// 		animation: {
-// 			duration: 0,
-// 		},
-// 		scales: {
-// 			x: {
-// 				type: "linear",
-// 				position: "bottom",
-// 			},
-// 		},
-// 		plugins: {
-// 			tooltip: {
-// 				callbacks: {
-// 					label: function (context) {
-// 						return `${context.raw.name}`;
-// 					},
-// 				},
-// 			},
-// 			title: {
-// 				display: false,
-// 				text: `Cost Effective Scatterplot`,
-// 			},
-// 		},
-// 	},
-// };
+fillDountExecute();
+fillCompareBarGraphExecute();
+var currChart = createPeriodLineGraph();
 
-// const config_sb1 = {
-// 	type: "bar",
-// 	data: data_sb1,
-// 	options: {
-// 		plugins: {
-// 			title: {
-// 				display: false,
-// 				text: "",
-// 			},
-// 		},
-// 		responsive: true,
-// 		scales: {
-// 			x: {
-// 				stacked: true,
-// 			},
-// 			y: {
-// 				stacked: true,
-// 			},
-// 		},
-// 		indexAxis: "y",
-// 		elements: {
-// 			bar: {
-// 				borderWidth: 2,
-// 			},
-// 		},
-// 		categoryPercentage: 0.5,
-// 		barPercentage: 0.8,
-// 	},
-// };
+function createPeriodLineGraph(target = "engagement") {
+	if (by == "date") {
+		const data_l1_d = {
+			labels: interpretDate(formDateRange()),
+			datasets: formDatasetWithDate(summaryPerMonth, [target]),
+		};
 
-// Always before draw Chart
-// detectEmptyLabel(config_l1, "g-l1");
-
-fillDount();
-
-if (by == "date") {
-	const data_l1_d = {
-		labels: interpretDate(formDateRange()),
-		datasets: formDatasetWithDate(summaryPerMonth, multiple_selector),
-	};
-
-	const config_l1_d = {
-		type: "line",
-		data: data_l1_d,
-		options: {
-			responsive: true,
-			plugins: {
-				legend: {
-					position: "top",
-				},
-				title: {
-					display: false,
-					text: "Summation per Month",
+		const config_l1_d = {
+			type: "line",
+			data: data_l1_d,
+			options: {
+				responsive: true,
+				plugins: {
+					legend: {
+						position: "top",
+					},
+					title: {
+						display: false,
+						text: "Summation per Month",
+					},
 				},
 			},
-		},
-	};
+		};
+		document.getElementById("summary-per-title").innerHTML = `กราฟผลรวมต่อเดือนตั้งแต่ ${monthof(earliestMonth[0])}, ${earliestMonth[1]} ถึง ${monthof(lastestMonth[0])}, ${lastestMonth[1]}`;
+		// fillTitleNameSPMT("summary-per-month-title", earliestMonth, lastestMonth);
+		return new Chart(document.getElementById("line-1"), config_l1_d);
+	}
 
-	fillTitleNameSPMT("summary-per-month-title", earliestMonth, lastestMonth);
-	new Chart(document.getElementById("line-1"), config_l1_d);
-}
+	if (by == "period") {
+		const data_l1_p = {
+			labels: interpretPeriod(PERIODINYEAR),
+			datasets: formDatasetWithPeriod(target),
+		};
 
-if (by == "period") {
-	console.log(by);
-	const data_l1_p = {
-		labels: interpretPeriod(PERIODINYEAR),
-		datasets: formDatasetWithPeriod(),
-	};
-
-	const config_l1_p = {
-		type: "line",
-		data: data_l1_p,
-		options: {
-			responsive: true,
-			plugins: {
-				legend: {
-					position: "top",
-				},
-				title: {
-					display: false,
-					text: "Summation per Month",
+		const config_l1_p = {
+			type: "line",
+			data: data_l1_p,
+			options: {
+				responsive: true,
+				plugins: {
+					legend: {
+						position: "top",
+					},
+					title: {
+						display: false,
+						text: "Summation per Month",
+					},
 				},
 			},
-		},
-	};
-
-	new Chart(document.getElementById("line-1"), config_l1_p);
+		};
+		var allyear = removeDuplicate(year);
+		if (compare) {
+			allyear = removeDuplicate(year.concat(year_2));
+		}
+		document.getElementById("summary-per-title").innerHTML = `กราฟผลรวมทั้งปี ${allyear.toString()} แบ่งตามพีเรียด`;
+		return new Chart(document.getElementById("line-1"), config_l1_p);
+	}
 }
 
 // detectEmptyLabel(config_l1, "g-l1");
+
+function minorDropdown(target) {
+	currChart.destroy();
+	currChart = createPeriodLineGraph(target);
+}
 
 function detectEmptyLabel(config, target_div) {
 	var datasets = config.data.datasets;

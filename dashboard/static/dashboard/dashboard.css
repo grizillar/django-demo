@@ -156,3 +156,22 @@ td {
 .negative-percentage {
 	color: rgb(193, 54, 54);
 }
+
+.total-row {
+	background-color: black;
+	color: white;
+}
+
+.minor-query {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+#minor-query-g-l1 {
+	border-color: transparent;
+}
+
+.dropdown-item:active {
+	background-color: var(--primary-color);
+}

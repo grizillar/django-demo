@@ -1,4 +1,5 @@
 var summary = jsonParseQuot(summaryJSON);
+var totalSummary = jsonParseQuot(totalSummaryJSON);
 var costPerResult = jsonParseQuot(CPRJSON);
 var summaryPerMonth = jsonParseQuot(summaryPMJSON);
 var platformCount = jsonParseQuot(platformCountJSON);
@@ -6,10 +7,12 @@ var possibleYear = jsonParseQuot(possibleYearJSON);
 
 if (compare) {
 	var summary_2 = jsonParseQuot(summary_2JSON);
+	var totalSummary_2 = jsonParseQuot(totalSummary_2JSON);
 	var platformCount_2 = jsonParseQuot(platformCount_2JSON);
 	var summaryCompare = jsonParseQuot(summaryCompareJSON);
 	var costPerResult_2 = jsonParseQuot(CPR_2JSON);
 	var CPRCompare = jsonParseQuot(CPRCompareJSON);
+	var totalSummaryCompare = jsonParseQuot(totalSummaryCompareJSON);
 }
 
 var summaryArray = "";
@@ -67,13 +70,13 @@ intervalTabs.addEventListener("click", (event) => {
 
 construct_table(summary, "summary", platform_range, "a");
 construct_table(costPerResult, "costperresult", objective_range, "b");
+
 if (compare) {
 	construct_table(summary_2, "summary-2", platform_range, "c");
 	construct_table(summaryCompare, "summary-compare-table", platform_range, "d");
-	colorPercentage("d", 7, 10);
+
 	construct_table(costPerResult_2, "costperresult-2", objective_range, "e");
 	construct_table(CPRCompare, "costperresult-compare", objective_range, "f");
-	colorPercentage("f", 7, 10);
 }
 
 function initParams() {
@@ -91,10 +94,14 @@ function initParams() {
 	fillCount();
 
 	fillRatioDonut("chart-test-1");
+	fillCompareBarGraph("chart-cbg");
 
 	showData2();
-
-	demoFunction1();
+	addSummaryTotal();
+	if (compare) {
+		colorPercentage("d", 8, 10);
+		colorPercentage("f", 7, 10);
+	}
 
 	// document.getElementById("topCPO-th").innerHTML = `Cost/<br>${capitalizeFirstLetter(single_selector)}`;
 }
@@ -104,10 +111,10 @@ initParams();
 
 function demoFunction1() {
 	if (by == "date") {
-		document.getElementById("summary-per-month-title").innerHTML = "กราฟผลรวม Reach, Impression, Engagementแต่ละเดือน";
+		document.getElementById("summary-per-month-title").innerHTML = "กราฟผลรวม แต่ละเดือน";
 	}
 	if (by == "period") {
-		document.getElementById("summary-per-month-title").innerHTML = "กราฟผลรวม Engagment แต่ละพีเรียด";
+		document.getElementById("summary-per-month-title").innerHTML = "กราฟผลรวม แต่ละพีเรียด";
 	}
 }
 
@@ -267,6 +274,57 @@ function showData2() {
 			document.getElementById("cost-per-result-compare-row").classList.remove("hidden");
 			fillCount2();
 		}
+	}
+}
+
+function addSummaryTotal() {
+	var summary_tbody = document.getElementById("summary");
+	var tr_format = `
+	<tr class="total-row">
+		<td id="a-7-0"></td>
+		<td id="a-7-1">Total</td>
+		<td id="a-7-2">${totalSummary.spending[0]}</td>
+		<td id="a-7-3">${totalSummary.reach[0]}</td>
+		<td id="a-7-4">${totalSummary.impression[0]}</td>
+		<td id="a-7-5">${totalSummary.engagement[0]}</td>
+		<td id="a-7-6">${totalSummary.user[0]}</td>
+		<td id="a-7-7">${totalSummary.new_user[0]}</td>
+		<td id="a-7-8">${totalSummary.order[0]}</td>
+		<td id="a-7-9">${totalSummary.revenue[0]}</td>
+	</tr>`;
+	summary_tbody.innerHTML += tr_format;
+	if (compare) {
+		var summary_2_tbody = document.getElementById("summary-2");
+		var tr_format_2 = `
+		<tr class="total-row">
+			<td id="c-7-0"></td>
+			<td id="c-7-1">Total</td>
+			<td id="c-7-2">${totalSummary_2.spending[0]}</td>
+			<td id="c-7-3">${totalSummary_2.reach[0]}</td>
+			<td id="c-7-4">${totalSummary_2.impression[0]}</td>
+			<td id="c-7-5">${totalSummary_2.engagement[0]}</td>
+			<td id="c-7-6">${totalSummary_2.user[0]}</td>
+			<td id="c-7-7">${totalSummary_2.new_user[0]}</td>
+			<td id="c-7-8">${totalSummary_2.order[0]}</td>
+			<td id="c-7-9">${totalSummary_2.revenue[0]}</td>
+		</tr>`;
+		summary_2_tbody.innerHTML += tr_format_2;
+
+		var summary_compare_tbody = document.getElementById("summary-compare-table");
+		var tr_format_c = `
+		<tr class="total-row">
+			<td id="d-7-0"></td>
+			<td id="d-7-1">Total</td>
+			<td id="d-7-2">${totalSummaryCompare.spending[0]}</td>
+			<td id="d-7-3">${totalSummaryCompare.reach[0]}</td>
+			<td id="d-7-4">${totalSummaryCompare.impression[0]}</td>
+			<td id="d-7-5">${totalSummaryCompare.engagement[0]}</td>
+			<td id="d-7-6">${totalSummaryCompare.user[0]}</td>
+			<td id="d-7-7">${totalSummaryCompare.new_user[0]}</td>
+			<td id="d-7-8">${totalSummaryCompare.order[0]}</td>
+			<td id="d-7-9">${totalSummaryCompare.revenue[0]}</td>
+		</tr>`;
+		summary_compare_tbody.innerHTML += tr_format_c;
 	}
 }
 
@@ -439,6 +497,29 @@ function fillRatioDonut(target) {
 				</div>
 			</div>
 		`;
+	}
+}
+
+function fillCompareBarGraph(target) {
+	if (compare) {
+		target_div = document.getElementById(target);
+		for (let i = 0; i < multiple_selector.length; i++) {
+			target_div.innerHTML += `
+		<div class="col-4 d-flex">
+			<div class="card w-100">
+				<div class="card-body">
+					<p class="graph-title">
+						กราฟเปรียบเทียบผลรวม
+						<br />${capitalizeFirstLetter(multiple_selector[i])} ของแต่ละช่วงพีเรียด
+					</p>
+					<div class="d-flex justify-content-center align-items-center">
+						<canvas id="cbg-${i}"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+		`;
+		}
 	}
 }
 

@@ -137,6 +137,7 @@ def formPeriodRange(period, year):
                 periods.append(p)
                 years.append(y)
                 y += 1
+                p = 1
             else:
                 periods.append(p)
                 years.append(y)
@@ -149,10 +150,84 @@ def formPeriodRange(period, year):
 
 def formQueryArray(func, period_list, year_list, platform):
     arr = []
+    if period_list == None:
+        period_list = [None for x in range(len(year_list))]
     for i in range(len(year_list)):
         arr.append(func(
             period_list[i], year_list[i], platform).to_json())
     return ("|".join(a for a in arr))
+
+
+def queryByPeriodinRange(query, periods, years, platform):
+    c = len(periods)
+    df = query(periods[0], years[0], platform)
+    df.fillna(0, inplace=True)
+    for i in range(1, c):
+        q = query(periods[i], years[i], platform).fillna(0)
+        df = dataframeIncrement(df, q, [
+                                "pid", "platform_name", "objective"])
+    return df
+
+
+def queryByPeriodinConcat(query, periods, years, platform):
+
+    c = len(periods)
+    df = query(periods[0], years[0], platform)
+    df.fillna(0, inplace=True)
+    for i in range(1, c):
+        q = query(periods[i], years[i], platform).fillna(0)
+        if q.shape[0] == 0:
+            q = pd.DataFrame({
+                'period': [periods[i]],
+                'year': [years[i]]
+            })
+            q.fillna(0, inplace=True)
+        df = pd.concat([df, q])
+    df.fillna(0, inplace=True)
+    return df
+
+
+def intByPeriodinRange(query, periods, years, platform):
+    c = len(periods)
+    s = 0
+    for i in range(0, c):
+        s = s + query(periods[i], years[i], platform)
+
+    return s
+
+
+def percentageChange(old_df, new_df):
+    def format(x):
+        if x > 0:
+            return f'+{x}%'
+        else:
+            return f'{x}%'
+
+    dfc = pd.DataFrame()
+    exception = ["pid", "platform_name", "objective"]
+    for c in old_df.columns:
+        if c not in exception:
+            dfc[c] = round((new_df[c] - old_df[c])/old_df[c] * 100, 2)
+            dfc[c] = dfc[c].apply(format)
+
+        else:
+            dfc[c] = old_df[c]
+    return dfc
+
+
+def getTotalRow(df):
+    exception = ['pid']
+
+    def is_numeric(series: pd.Series) -> bool:
+        return pd.to_numeric(series, errors='coerce').notnull().all()
+
+    totaldict = {}
+    for col in df.columns:
+        if (is_numeric(df[col]) and col not in exception):
+            totaldict[col] = [round(df[col].sum(), 2)]
+
+    total = pd.DataFrame(totaldict)
+    return total
 
 
 def writeCSV(file):
@@ -321,6 +396,7 @@ def getAllSummary(startdate=None, enddate=None, platform=None):
         ON p.pid = t2.pid
     """
     summary = pd.read_sql_query(query, con=engine)
+    summary.fillna(0, inplace=True)
 
     return summary
 
@@ -645,40 +721,40 @@ def getSummaryByPeriod(period=None, year=None, platform=None):
     return summaryPerPeriod
 
 
-def queryByPeriodinRange(query, periods, years, platform):
-    c = len(periods)
-    df = query(periods[0], years[0], platform)
-    df.fillna(0, inplace=True)
-    for i in range(1, c):
-        q = query(periods[i], years[i], platform).fillna(0)
-        df = dataframeIncrement(df, q, [
-                                "pid", "platform_name", "objective"])
-    return df
+def getSummaryBySinglePeriod(period=None, year=None, platform=None):
 
+    platform = listToSQLString(normalizePlatform(platform))
 
-def intByPeriodinRange(query, periods, years, platform):
-    c = len(periods)
-    s = 0
-    for i in range(0, c):
-        s = s + query(periods[i], years[i], platform)
+    query = f'''
+        SELECT p.period, p.year, t1.spending, t1.reach, t1.impression, t1.engagement, t2.[user], t2.new_user, t2.[order], t2.revenue
+        FROM
+        (
+            SELECT DISTINCT period, year
+            FROM Campaign
+            WHERE year = {year} AND period = {period}
+            UNION
+            SELECT DISTINCT period, year
+            FROM SiteTraffic
+            WHERE year = {year} AND period = {period}
+        ) p
+        LEFT JOIN
+        (
+            SELECT c.period, SUM(c.spending) as 'spending', SUM(c.reach) as 'reach', SUM(c.impression) as 'impression', SUM(c.engagement) as 'engagement'
+            FROM dbo.Campaign as c, dbo.SiteTraffic as s
+            WHERE c.year = {year} AND c.period = {period} AND c.pid IN {platform}
+            GROUP BY c.period
+        ) t1
+        ON p.period = t1.period
+        FULL OUTER JOIN
+        (
+            SELECT s.period, SUM(s.all_user) as 'user', SUM(s.new_user) as 'new_user', SUM(s.order_count) as 'order', SUM(s.revenue) as 'revenue'
+            FROM dbo.SiteTraffic as s
+            WHERE s.year = {year} AND s.period = {period} AND s.pid IN {platform}
+            GROUP BY s.period
+        ) t2
+        ON p.period = t2.period
+    '''
+    summaryPerSinglePeriod = pd.read_sql_query(query, con=engine)
+    summaryPerSinglePeriod.fillna(0, inplace=True)
 
-    return s
-
-
-def percentageChange(old_df, new_df):
-    def format(x):
-        if x > 0:
-            return f'+{x}%'
-        else:
-            return f'{x}%'
-
-    dfc = pd.DataFrame()
-    exception = ["pid", "platform_name", "objective"]
-    for c in old_df.columns:
-        if c not in exception:
-            dfc[c] = round((new_df[c] - old_df[c])/old_df[c] * 100, 2)
-            dfc[c] = dfc[c].apply(format)
-
-        else:
-            dfc[c] = old_df[c]
-    return dfc
+    return summaryPerSinglePeriod
